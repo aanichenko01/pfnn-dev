@@ -14,5 +14,5 @@ class PFNNHiddenLayer(nn.Module):
         return torch.bmm(input, self.W.permute(0, 2, 1))
 
     def cost(self):
-        # TODO potentially remove the torch.mean since not in original paper
+        # TODO potentially remove the torch.mean since not in
         return self.gamma * torch.mean(torch.abs(self.W))
