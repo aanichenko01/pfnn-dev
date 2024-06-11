@@ -1,0 +1,4 @@
+# Ignore generated data files
+Input.txt
+Output.txt
+Phases.txt
