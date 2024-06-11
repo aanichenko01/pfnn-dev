@@ -2,3 +2,9 @@
 Input.txt
 Output.txt
 Phases.txt
+
+# Ignore saved weights
+weights/
+
+# Ignore Python cache files
+__pycache__/
