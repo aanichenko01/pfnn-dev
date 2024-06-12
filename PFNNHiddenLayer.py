@@ -8,11 +8,11 @@ class PFNNHiddenLayer(nn.Module):
         super(PFNNHiddenLayer, self).__init__()
         W_bound = np.sqrt(6. / np.prod(weights_shape[-2:]))
         self.W = nn.Parameter(torch.empty(weights_shape).uniform_(-W_bound, W_bound))
+        self.b = nn.Parameter(torch.zeros((weights_shape[0], weights_shape[1])))
         self.gamma = gamma
 
     def forward(self, input):
-        return torch.bmm(input, self.W.permute(0, 2, 1))
+        return torch.bmm(input, self.W.permute(0, 2, 1)) + self.b.unsqueeze(1)
 
     def cost(self):
-        # TODO potentially remove the torch.mean since not in
         return self.gamma * torch.mean(torch.abs(self.W))
