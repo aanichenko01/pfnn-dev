@@ -11,8 +11,8 @@ class PFNNHiddenLayer(nn.Module):
         self.b = nn.Parameter(torch.zeros((weights_shape[0], weights_shape[1])))
         self.gamma = gamma
 
-    def forward(self, input):
-        return torch.bmm(input, self.W.permute(0, 2, 1)) + self.b.unsqueeze(1)
+    def forward(self, interpolated_w, interpolated_b, input):
+        return torch.bmm(interpolated_w, input).squeeze(-1) + interpolated_b
 
     def cost(self):
         return self.gamma * torch.mean(torch.abs(self.W))
