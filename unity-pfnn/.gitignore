@@ -2,9 +2,10 @@
 # This .gitignore file should be placed at the root of your Unity project directory
 #
 
-# Ingore model parameters
+# Ingore model parameters (too big to store on GitHub but they are regenerated quickly)
 Parameters.asset
 Parameters.asset.meta
+
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 /[Ll]ibrary/
