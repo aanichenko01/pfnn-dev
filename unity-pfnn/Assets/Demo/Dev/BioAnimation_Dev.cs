@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace SIGGRAPH_2017 {
-	public class BioAnimation_Original : MonoBehaviour {
+namespace PFNN_DEV {
+	public class BioAnimation_Dev : MonoBehaviour {
 
 		public bool Inspect = false;
 
@@ -84,19 +84,36 @@ namespace SIGGRAPH_2017 {
 			}
 			
 			//Update Target Direction / Velocity
-			TargetDirection = Vector3.Lerp(TargetDirection, Quaternion.AngleAxis(Controller.QueryTurn()*60f, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection(), TargetBlending);
-			// TargetVelocity = Vector3.Lerp(TargetVelocity, (Quaternion.LookRotation(TargetDirection, Vector3.up) * Controller.QueryMove(transform.position)).normalized, TargetBlending);
-			TargetVelocity = Vector3.Lerp(TargetVelocity, (Quaternion.LookRotation(TargetDirection, Vector3.up) * Controller.QueryMove()).normalized, TargetBlending);
 
-			
+			// If working with wasd inputs use this
+			// TargetDirection = Vector3.Lerp(TargetDirection, Quaternion.AngleAxis(Controller.QueryTurn()*60f, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection(), TargetBlending);
+			// TargetVelocity = Vector3.Lerp(TargetVelocity, (Quaternion.LookRotation(TargetDirection, Vector3.up) * Controller.QueryMove()).normalized, TargetBlending);
+
+			// Waypoint inputs (best working version)
+			// TargetDirection = Vector3.Lerp(TargetDirection, Controller.QueryTurn(transform.position) * Trajectory.Points[RootPointIndex].GetDirection(), TargetBlending);
+			// TargetVelocity = Vector3.Lerp(TargetVelocity, (Quaternion.LookRotation(TargetDirection, Vector3.up) * Controller.QueryMove(transform.position)).normalized, TargetBlending);
+
+
+			Transform currentWaypoint = Controller.getCurrentWaypoint(transform.position);
+			transform.LookAt(currentWaypoint.position);
+			// TargetDirection = transform.rotation * Vector3.forward;
+			// TargetVelocity = Controller.QueryMove(transform.position, currentWaypoint.position);
+			TargetDirection = Vector3.Lerp(TargetDirection, transform.rotation *  Vector3.forward, TargetBlending);
+			TargetVelocity = Vector3.Lerp(TargetVelocity, Controller.QueryMove(transform.position, currentWaypoint.position), TargetBlending);
+
 			//Update Gait
 			// COMMENT BACK IN
-			for(int i=0; i<Controller.Styles.Length; i++) {
-				Trajectory.Points[RootPointIndex].Styles[i] = Utility.Interpolate(Trajectory.Points[RootPointIndex].Styles[i], Controller.Styles[i].Query() ? 1f : 0f, GaitTransition);
-				Debug.Log($"Trajectory.Points[{RootPointIndex}].Styles[{i}] = {Trajectory.Points[RootPointIndex].Styles[i]}");
-			}
-
+			// for(int i=0; i<Controller.Styles.Length; i++) {
+			// 	Trajectory.Points[RootPointIndex].Styles[i] = Utility.Interpolate(Trajectory.Points[RootPointIndex].Styles[i], Controller.Styles[i].Query() ? 1f : 0f, GaitTransition);
+			// 	Debug.Log($"Trajectory.Points[{RootPointIndex}].Styles[{i}] = {Trajectory.Points[RootPointIndex].Styles[i]}");
+			// }
 			// ABOVE THIS
+
+			// Stand
+			Trajectory.Points[RootPointIndex].Styles[0] = Utility.Interpolate(Trajectory.Points[RootPointIndex].Styles[0], 0f, GaitTransition);
+			// Walk
+			Trajectory.Points[RootPointIndex].Styles[1] = Utility.Interpolate(Trajectory.Points[RootPointIndex].Styles[1], 1f, GaitTransition);
+
 
 			//For Human Only
 			//Trajectory.Points[RootPointIndex].Styles[0] = Utility.Interpolate(Trajectory.Points[RootPointIndex].Styles[0], 1.0f - Mathf.Clamp(Vector3.Magnitude(TargetVelocity) / 0.1f, 0.0f, 1.0f), GaitTransition);
@@ -126,7 +143,6 @@ namespace SIGGRAPH_2017 {
 				float scale_pos = (1.0f - Mathf.Pow(1.0f - ((float)(i - RootPointIndex) / (RootPointIndex)), bias_pos));
 				float scale_dir = (1.0f - Mathf.Pow(1.0f - ((float)(i - RootPointIndex) / (RootPointIndex)), bias_dir));
 				float vel_boost = PoolBias();
-
 
 				float rescale = 1f / (Trajectory.Points.Length - (RootPointIndex + 1f));
 
@@ -420,13 +436,13 @@ namespace SIGGRAPH_2017 {
 	}
 
 	#if UNITY_EDITOR
-	[CustomEditor(typeof(BioAnimation_Original))]
-	public class BioAnimation_Original_Editor : Editor {
+	[CustomEditor(typeof(BioAnimation_Dev))]
+	public class BioAnimation_Dev_Editor : Editor {
 
-			public BioAnimation_Original Target;
+			public BioAnimation_Dev Target;
 
 			void Awake() {
-				Target = (BioAnimation_Original)target;
+				Target = (BioAnimation_Dev)target;
 			}
 
 			public override void OnInspectorGUI() {
