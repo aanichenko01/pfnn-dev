@@ -87,6 +87,11 @@ namespace PFNN_DEV
 		{
 			Utility.SetFPS(60);
 			FollowWaypoints = Controller.initializeFirstWaypoint();
+			if(FollowWaypoints) {
+				Debug.Log("Following provided waypoints.");
+			} else {
+				Debug.Log("Controlling charachter using keyboard inputs.");
+			}
 		}
 
 		void Update()
