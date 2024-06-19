@@ -75,7 +75,6 @@ namespace SIGGRAPH_2017 {
 
 		void Start() {
 			Utility.SetFPS(60);
-			Controller.initializeCurrentWaypoint();
 		}
 
 		void Update() {

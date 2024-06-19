@@ -68,9 +68,32 @@ public class Controller
 		return move;
 	}
 
-	public void initializeCurrentWaypoint()
+	public float QueryTurn()
 	{
-		currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint);
+		float turn = 0f;
+		if (InputHandler.GetKey(TurnLeft))
+		{
+			turn -= 1f;
+		}
+		if (InputHandler.GetKey(TurnRight))
+		{
+			turn += 1f;
+		}
+		return turn;
+	}
+
+	public bool initializeFirstWaypoint()
+	{
+		if (waypoints != null)
+		{
+			currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+
 	}
 
 	public Transform getCurrentWaypoint(Vector3 currentPosition)
@@ -83,48 +106,11 @@ public class Controller
 		return currentWaypoint;
 	}
 
-	public Vector3 QueryMove(Vector3 currentPosition, Vector3 currentWaypointPosition)
+	public Vector3 QueryMove(Vector3 currentPosition)
 	{
-		Vector3 move = (currentWaypointPosition - currentPosition).normalized;
-
-		// If close enough to waypoint get the next one
-		// if (Vector3.Distance(currentPosition, currentWaypoint.position) < 0.5f)
-		// {
-		// 	Debug.Log("UPDATED WAYPOINT IN MOVE");
-		// 	currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint);
-		// }
-
-		// Debug.Log("MOVE: " + move.ToString("F3"));
-
+		Vector3 move = (getCurrentWaypoint(currentPosition).position - currentPosition).normalized;
 		return move;
 	}
-
-	public float QueryTurn() {
-		float turn = 0f;
-		if(InputHandler.GetKey(TurnLeft)) {
-			turn -= 1f;
-		}
-		if(InputHandler.GetKey(TurnRight)) {
-			turn += 1f;
-		}
-		return turn;
-	}
-
-
-	// public Quaternion QueryTurn(Vector3 currentPosition)
-	// {
-	// 	Vector3 relativePosition = (currentWaypoint.position - currentPosition).normalized;
-
-	// 	Quaternion rotation = Quaternion.LookRotation(relativePosition);
-	// 	// Debug.Log("ROTATION: " + rotation.ToString("F3"));
-	// 	// if (Vector3.Distance(currentPosition, currentWaypoint.position) < 0.5f)
-	// 	// {
-	// 	// 	Debug.Log("UPDATED WAYPOINT IN MOVE");
-	// 	//     currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint);
-	// 	// }
-
-	// 	return rotation;
-	// }
 
 	public void SetStyleCount(int count)
 	{
