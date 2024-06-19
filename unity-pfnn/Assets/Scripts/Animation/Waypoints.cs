@@ -5,8 +5,7 @@ using UnityEngine;
 public class Waypoints : MonoBehaviour
 {
 
-    [Range(0f, 2f)]
-    [SerializeField] private float waypointSize = 1f;
+    [SerializeField] private float waypointSize = 0.25f;
 
     // method that is called in the editor so we can draw something in scene view
     // ONDRAWGIZMOS ONLY CALLED IN SCENE VIEW so just for visualization
