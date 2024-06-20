@@ -36,6 +36,7 @@ namespace PFNN_DEV
 		private Vector3[] Velocities = new Vector3[0];
 
 		private Transform currentWaypoint;
+		private Transform PreviousWaypoint;
 
 		//Trajectory for 60 Hz framerate
 		private const int PointSamples = 12;
@@ -89,9 +90,12 @@ namespace PFNN_DEV
 		{
 			Utility.SetFPS(60);
 			FollowWaypoints = Controller.initializeFirstWaypoint();
-			if(FollowWaypoints) {
+			if (FollowWaypoints)
+			{
 				Debug.Log("Following provided waypoints.");
-			} else {
+			}
+			else
+			{
 				Debug.Log("Controlling charachter using keyboard inputs.");
 			}
 		}
@@ -104,6 +108,7 @@ namespace PFNN_DEV
 			}
 
 			currentWaypoint = Controller.getCurrentWaypoint(transform.position);
+			PreviousWaypoint = Controller.GetPreviousWaypoint();
 
 			//Update Target Direction / Velocity
 
@@ -177,13 +182,22 @@ namespace PFNN_DEV
 
 			for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
 			{
+				Debug.Log($"Trajectory blend {i}= {trajectory_positions_blend[i]}");
 				Trajectory.Points[i].SetPosition(trajectory_positions_blend[i]);
 			}
 
 			for (int i = RootPointIndex; i < Trajectory.Points.Length; i += PointDensity)
 			{
-				// Trajectory.Points[i].Postprocess();
-				Trajectory.Points[i].PostprocessWaypoints(currentWaypoint.position);
+				
+				if (FollowWaypoints)
+				{
+					Trajectory.Points[i].PostprocessWaypoints(currentWaypoint.position);
+				}
+				else
+				{
+					Trajectory.Points[i].Postprocess();
+				}
+				
 			}
 
 			for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
@@ -193,14 +207,12 @@ namespace PFNN_DEV
 				Trajectory.Point prev = GetPreviousSample(i);
 				Trajectory.Point next = GetNextSample(i);
 				float factor = (float)(i % PointDensity) / PointDensity;
-				Debug.Log($"Factor = {factor}");
 
 				Trajectory.Points[i].SetPosition((1f - factor) * prev.GetPosition() + factor * next.GetPosition());
 				Trajectory.Points[i].SetDirection((1f - factor) * prev.GetDirection() + factor * next.GetDirection());
 				Trajectory.Points[i].SetLeftsample((1f - factor) * prev.GetLeftSample() + factor * next.GetLeftSample());
 				Trajectory.Points[i].SetRightSample((1f - factor) * prev.GetRightSample() + factor * next.GetRightSample());
 				Trajectory.Points[i].SetSlope((1f - factor) * prev.GetSlope() + factor * next.GetSlope());
-				// Debug.Log($"Slope for index {i} = {Trajectory.Points[i].GetSlope()}");
 			}
 
 			//Avoid Collisions
@@ -280,11 +292,22 @@ namespace PFNN_DEV
 				//Update Current Trajectory
 				Trajectory.Points[RootPointIndex].SetPosition((rest * new Vector3(NN.GetOutput(0) / UnitScale, 0f, NN.GetOutput(1) / UnitScale)).GetRelativePositionFrom(currentRoot));
 				Trajectory.Points[RootPointIndex].SetDirection(Quaternion.AngleAxis(rest * Mathf.Rad2Deg * (-NN.GetOutput(2)), Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection());
-				// Trajectory.Points[RootPointIndex].Postprocess();
-				Trajectory.Points[RootPointIndex].PostprocessWaypoints(currentWaypoint.position);
+
+				if (FollowWaypoints)
+				{
+					Trajectory.Points[RootPointIndex].PostprocessWaypoints(currentWaypoint.position);
+				}
+				else
+				{
+					Trajectory.Points[RootPointIndex].Postprocess();
+				}
+
 				Matrix4x4 nextRoot = Trajectory.Points[RootPointIndex].GetTransformation();
 
 				//Update Future Trajectory
+				// TODO DELETE COMMENT AFTER DEV COMPLETE
+				// IF EVER WANT TO SANITY CHECK INPUTS INTO NETWORK ARE CORRECT COMMENT OUT THE FOLLOWING TWO FOR LOOPS
+				// OTHERWISE SOMETIMES NETWORK OVERRIDES THE INPUT SO HARD TO TELL
 				for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
 				{
 					Trajectory.Points[i].SetPosition(Trajectory.Points[i].GetPosition() + (rest * new Vector3(NN.GetOutput(0) / UnitScale, 0f, NN.GetOutput(1) / UnitScale)).GetRelativeDirectionFrom(nextRoot));
@@ -315,8 +338,15 @@ namespace PFNN_DEV
 
 				for (int i = RootPointIndex + PointDensity; i < Trajectory.Points.Length; i += PointDensity)
 				{
-					// Trajectory.Points[i].Postprocess();
-					Trajectory.Points[i].PostprocessWaypoints(currentWaypoint.position);
+
+					if (FollowWaypoints)
+					{
+						Trajectory.Points[i].PostprocessWaypoints(currentWaypoint.position);
+					}
+					else
+					{
+						Trajectory.Points[i].Postprocess();
+					}
 				}
 
 				for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)

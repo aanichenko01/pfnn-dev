@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Scripting.APIUpdating;
 
 public class Trajectory {
 
@@ -91,6 +92,8 @@ public class Trajectory {
 		public float[] Signals = new float[0];
 		public float[] Styles = new float[0];
 		public float[] StyleUpdate = new float[0];
+
+		private float InterpolateAmount;
 
 		public Point(int index, int styles) {
 			Index = index;
@@ -201,7 +204,6 @@ public class Trajectory {
 			SetPosition(position);
 
 			Slope = Utility.GetSlope(position, mask);
-			// Slope = 10f;
 
 			Vector3 ortho = Quaternion.Euler(0f, 90f, 0f) * direction;
 			RightSample = position + Trajectory.Width * ortho.normalized;
@@ -210,25 +212,22 @@ public class Trajectory {
 			LeftSample.y = Utility.GetHeight(LeftSample, mask);
 		}
 
-		public void PostprocessWaypoints(Vector3 WaypointPosition) {
-			LayerMask mask = LayerMask.GetMask("Ground");
+		public void PostprocessWaypoints(Vector3 waypointPosition) {
 			Vector3 position = Transformation.GetPosition();
 			Vector3 direction = Transformation.GetForward();
 
 			var step = 0.5f * Time.deltaTime;
-			position.y = Vector3.MoveTowards(Transformation.GetPosition(), WaypointPosition, step).y;
-
-			// position.y = Utility.GetHeight(Transformation.GetPosition(), mask);
+			var move = Vector3.MoveTowards(Transformation.GetPosition(), waypointPosition, step);
+			position.y = move.y;
 			SetPosition(position);
 
-			Slope = Utility.GetSlope(position, mask);
+			Slope = Utility.GetSlopeToWaypoint(position, waypointPosition);
 
 			Vector3 ortho = Quaternion.Euler(0f, 90f, 0f) * direction;
 			RightSample = position + Trajectory.Width * ortho.normalized;
-			RightSample.y = Utility.GetHeight(RightSample, mask);
 			LeftSample = position - Trajectory.Width * ortho.normalized;
-			LeftSample.y = Utility.GetHeight(LeftSample, mask);
 		}
+
 	}
 
 	public void Draw(int step=1) {
@@ -319,13 +318,13 @@ public class Trajectory {
 		}
 		*/
 
-		//Projections
-		//for(int i=0; i<Points.Length; i+=step) {
-		//	Vector3 right = Points[i].GetRightSample();
-		//	Vector3 left = Points[i].GetLeftSample();
-		//	UltiDraw.DrawCircle(right, 0.01f, UltiDraw.Yellow);
-		//	UltiDraw.DrawCircle(left, 0.01f, UltiDraw.Yellow);
-		//}
+		// Projections
+		// for(int i=0; i<Points.Length; i+=step) {
+		// 	Vector3 right = Points[i].GetRightSample();
+		// 	Vector3 left = Points[i].GetLeftSample();
+		// 	UltiDraw.DrawCircle(right, 0.01f, UltiDraw.Yellow);
+		// 	UltiDraw.DrawCircle(left, 0.01f, UltiDraw.Yellow);
+		// }
 
 		//Slopes
 		for(int i=0; i<Points.Length; i+=step) {

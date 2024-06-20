@@ -98,12 +98,16 @@ public class Controller
 
 	public Transform getCurrentWaypoint(Vector3 currentPosition)
 	{
-		if (Vector3.Distance(currentPosition, currentWaypoint.position) < 0.5f)
+		if (Vector3.Distance(currentPosition, currentWaypoint.position) < 0.2f)
 		{
 			currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint);
 		}
 
 		return currentWaypoint;
+	}
+
+	public Transform GetPreviousWaypoint() {
+		return waypoints.GetPreviousWaypoint(currentWaypoint);
 	}
 
 	public Vector3 QueryMove(Vector3 currentPosition)

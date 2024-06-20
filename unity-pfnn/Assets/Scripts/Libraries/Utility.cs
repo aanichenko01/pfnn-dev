@@ -274,6 +274,14 @@ public static class Utility {
 		return Vector3.Angle(normal, Vector3.up) / 90f;
 	}
 
+	public static float GetSlopeToWaypoint(Vector3 currentPosition, Vector3 waypointPosition) {
+		float horizontalDiff = Vector3.Distance(new Vector3(currentPosition.x, 0, currentPosition.z), new Vector3(waypointPosition.x, 0, waypointPosition.z));
+		float verticalDiff = waypointPosition.y - currentPosition.y;
+
+		float slope = verticalDiff / horizontalDiff;
+		return slope;
+	}
+
 	public static Vector3 GetNormal(Vector3 position, Vector3 point, Collider collider, float radius, LayerMask mask) {
 		if(position == point) {
 			List<RaycastHit> hits = new List<RaycastHit>();
