@@ -201,6 +201,27 @@ public class Trajectory {
 			SetPosition(position);
 
 			Slope = Utility.GetSlope(position, mask);
+			// Slope = 10f;
+
+			Vector3 ortho = Quaternion.Euler(0f, 90f, 0f) * direction;
+			RightSample = position + Trajectory.Width * ortho.normalized;
+			RightSample.y = Utility.GetHeight(RightSample, mask);
+			LeftSample = position - Trajectory.Width * ortho.normalized;
+			LeftSample.y = Utility.GetHeight(LeftSample, mask);
+		}
+
+		public void PostprocessWaypoints(Vector3 WaypointPosition) {
+			LayerMask mask = LayerMask.GetMask("Ground");
+			Vector3 position = Transformation.GetPosition();
+			Vector3 direction = Transformation.GetForward();
+
+			var step = 0.5f * Time.deltaTime;
+			position.y = Vector3.MoveTowards(Transformation.GetPosition(), WaypointPosition, step).y;
+
+			// position.y = Utility.GetHeight(Transformation.GetPosition(), mask);
+			SetPosition(position);
+
+			Slope = Utility.GetSlope(position, mask);
 
 			Vector3 ortho = Quaternion.Euler(0f, 90f, 0f) * direction;
 			RightSample = position + Trajectory.Width * ortho.normalized;
@@ -307,9 +328,9 @@ public class Trajectory {
 		//}
 
 		//Slopes
-		//for(int i=0; i<Points.Length; i+=step) {
-		//	UltiDraw.DrawLine(Points[i].GetPosition(), Points[i].GetPosition() + 1f * Points[i].GetSlope() * Vector3.up, 0.025f, 0f, UltiDraw.Blue.Transparent(0.75f));
-		//}
+		for(int i=0; i<Points.Length; i+=step) {
+			UltiDraw.DrawLine(Points[i].GetPosition(), Points[i].GetPosition() + 1f * Points[i].GetSlope() * Vector3.up, 0.025f, 0f, UltiDraw.Blue.Transparent(0.75f));
+		}
 
 		//Positions
 		for(int i=0; i<Points.Length; i+=step) {

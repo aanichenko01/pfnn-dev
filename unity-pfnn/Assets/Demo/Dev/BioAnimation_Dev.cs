@@ -35,6 +35,8 @@ namespace PFNN_DEV
 		private Vector3[] Ups = new Vector3[0];
 		private Vector3[] Velocities = new Vector3[0];
 
+		private Transform currentWaypoint;
+
 		//Trajectory for 60 Hz framerate
 		private const int PointSamples = 12;
 		private const int RootSampleIndex = 6;
@@ -101,11 +103,13 @@ namespace PFNN_DEV
 				return;
 			}
 
+			currentWaypoint = Controller.getCurrentWaypoint(transform.position);
+
 			//Update Target Direction / Velocity
 
 			if (FollowWaypoints)
 			{
-				transform.LookAt(Controller.getCurrentWaypoint(transform.position));
+				transform.LookAt(currentWaypoint);
 				TargetDirection = Vector3.Lerp(TargetDirection, transform.rotation * Vector3.forward, TargetBlending);
 				TargetVelocity = Vector3.Lerp(TargetVelocity, Controller.QueryMove(transform.position), TargetBlending);
 
@@ -178,7 +182,8 @@ namespace PFNN_DEV
 
 			for (int i = RootPointIndex; i < Trajectory.Points.Length; i += PointDensity)
 			{
-				Trajectory.Points[i].Postprocess();
+				// Trajectory.Points[i].Postprocess();
+				Trajectory.Points[i].PostprocessWaypoints(currentWaypoint.position);
 			}
 
 			for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
@@ -188,12 +193,14 @@ namespace PFNN_DEV
 				Trajectory.Point prev = GetPreviousSample(i);
 				Trajectory.Point next = GetNextSample(i);
 				float factor = (float)(i % PointDensity) / PointDensity;
+				Debug.Log($"Factor = {factor}");
 
 				Trajectory.Points[i].SetPosition((1f - factor) * prev.GetPosition() + factor * next.GetPosition());
 				Trajectory.Points[i].SetDirection((1f - factor) * prev.GetDirection() + factor * next.GetDirection());
 				Trajectory.Points[i].SetLeftsample((1f - factor) * prev.GetLeftSample() + factor * next.GetLeftSample());
 				Trajectory.Points[i].SetRightSample((1f - factor) * prev.GetRightSample() + factor * next.GetRightSample());
 				Trajectory.Points[i].SetSlope((1f - factor) * prev.GetSlope() + factor * next.GetSlope());
+				// Debug.Log($"Slope for index {i} = {Trajectory.Points[i].GetSlope()}");
 			}
 
 			//Avoid Collisions
@@ -273,7 +280,8 @@ namespace PFNN_DEV
 				//Update Current Trajectory
 				Trajectory.Points[RootPointIndex].SetPosition((rest * new Vector3(NN.GetOutput(0) / UnitScale, 0f, NN.GetOutput(1) / UnitScale)).GetRelativePositionFrom(currentRoot));
 				Trajectory.Points[RootPointIndex].SetDirection(Quaternion.AngleAxis(rest * Mathf.Rad2Deg * (-NN.GetOutput(2)), Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection());
-				Trajectory.Points[RootPointIndex].Postprocess();
+				// Trajectory.Points[RootPointIndex].Postprocess();
+				Trajectory.Points[RootPointIndex].PostprocessWaypoints(currentWaypoint.position);
 				Matrix4x4 nextRoot = Trajectory.Points[RootPointIndex].GetTransformation();
 
 				//Update Future Trajectory
@@ -307,7 +315,8 @@ namespace PFNN_DEV
 
 				for (int i = RootPointIndex + PointDensity; i < Trajectory.Points.Length; i += PointDensity)
 				{
-					Trajectory.Points[i].Postprocess();
+					// Trajectory.Points[i].Postprocess();
+					Trajectory.Points[i].PostprocessWaypoints(currentWaypoint.position);
 				}
 
 				for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
