@@ -22,8 +22,8 @@ public class Controller
 
 	public Style[] Styles = new Style[0];
 
-	[SerializeField] private Waypoints waypoints;
-	private Transform currentWaypoint;
+	[SerializeField] private Waypoints Waypoints;
+	private Transform CurrentWaypoint;
 
 	public float[] GetStyle()
 	{
@@ -45,6 +45,35 @@ public class Controller
 		return names;
 	}
 
+	public bool InitializeFirstWaypoint()
+	{
+		if (Waypoints != null)
+		{
+			CurrentWaypoint = Waypoints.GetNextWaypoint(CurrentWaypoint);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+
+	}
+
+	public Transform GetCurrentWaypoint(Vector3 currentPosition)
+	{
+		if (Vector3.Distance(currentPosition, CurrentWaypoint.position) < 0.2f)
+		{
+			CurrentWaypoint = Waypoints.GetNextWaypoint(CurrentWaypoint);
+		}
+
+		return CurrentWaypoint;
+	}
+
+	public Transform GetPreviousWaypoint()
+	{
+		return Waypoints.GetPreviousWaypoint(CurrentWaypoint);
+	}
+
 	public Vector3 QueryMove()
 	{
 		Vector3 move = Vector3.zero;
@@ -64,7 +93,6 @@ public class Controller
 		{
 			move.x += 1f;
 		}
-		// Debug.Log("Position" + move.ToString("F3"));
 		return move;
 	}
 
@@ -82,37 +110,9 @@ public class Controller
 		return turn;
 	}
 
-	public bool initializeFirstWaypoint()
+	public Vector3 QueryMoveToWaypoint(Vector3 currentPosition)
 	{
-		if (waypoints != null)
-		{
-			currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint);
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-
-	}
-
-	public Transform getCurrentWaypoint(Vector3 currentPosition)
-	{
-		if (Vector3.Distance(currentPosition, currentWaypoint.position) < 0.2f)
-		{
-			currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint);
-		}
-
-		return currentWaypoint;
-	}
-
-	public Transform GetPreviousWaypoint() {
-		return waypoints.GetPreviousWaypoint(currentWaypoint);
-	}
-
-	public Vector3 QueryMove(Vector3 currentPosition)
-	{
-		Vector3 move = (getCurrentWaypoint(currentPosition).position - currentPosition).normalized;
+		Vector3 move = (GetCurrentWaypoint(currentPosition).position - currentPosition).normalized;
 		return move;
 	}
 
@@ -276,7 +276,7 @@ public class Controller
 			{
 				using (new EditorGUILayout.VerticalScope("Box"))
 				{
-					waypoints = (Waypoints)EditorGUILayout.ObjectField("Waypoints", waypoints, typeof(Waypoints), true);
+					Waypoints = (Waypoints)EditorGUILayout.ObjectField("Waypoints", Waypoints, typeof(Waypoints), true);
 				}
 				using (new EditorGUILayout.VerticalScope("Box"))
 				{

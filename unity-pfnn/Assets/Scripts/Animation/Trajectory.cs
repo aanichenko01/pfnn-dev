@@ -93,8 +93,6 @@ public class Trajectory {
 		public float[] Styles = new float[0];
 		public float[] StyleUpdate = new float[0];
 
-		private float InterpolateAmount;
-
 		public Point(int index, int styles) {
 			Index = index;
 			Transformation = Matrix4x4.identity;

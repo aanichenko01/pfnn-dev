@@ -5,19 +5,19 @@ using UnityEngine;
 public class Waypoints : MonoBehaviour
 {
 
-    [SerializeField] private float waypointSize = 0.25f;
+    [SerializeField] private float WaypointSize = 0.1f;
 
-    // method that is called in the editor so we can draw something in scene view
-    // ONDRAWGIZMOS ONLY CALLED IN SCENE VIEW so just for visualization
+    // Drawing only visible in scene view
     private void OnDrawGizmos()
     {
-        // takes every transform that is a child of our current waypoint system
+        // Loop over waypoint objects and draw sphere
         foreach (Transform t in transform)
         {
             Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(t.position, waypointSize);
+            Gizmos.DrawWireSphere(t.position, WaypointSize);
         }
 
+        // Connect with lines
         Gizmos.color = Color.red;
         for (int i = 0; i < transform.childCount - 1; i++)
         {
@@ -31,33 +31,41 @@ public class Waypoints : MonoBehaviour
 
     public Transform GetNextWaypoint(Transform currentWaypoint)
     {
+        // If no waypoint initialized return first
         if (currentWaypoint == null)
         {
             return transform.GetChild(0);
         }
 
-        // get sibling gives us the specific index of the current object
-        if (currentWaypoint.GetSiblingIndex() < transform.childCount-1)
+        // Loop to next waypoint
+        if (currentWaypoint.GetSiblingIndex() < transform.childCount - 1)
         {
             return transform.GetChild(currentWaypoint.GetSiblingIndex() + 1);
-        } else {
-            // Only needed for looping trajectory (don't think I need it for jump)
+        }
+        else
+        {
+            // Loop back to first waypoint
             return transform.GetChild(0);
         }
     }
 
-        public Transform GetPreviousWaypoint(Transform currentWaypoint)
+    public Transform GetPreviousWaypoint(Transform currentWaypoint)
     {
+        // If no waypoint initialized return first
         if (currentWaypoint == null)
         {
             return transform.GetChild(0);
         }
-        
+
+        // Loop to prev waypoint
         if (currentWaypoint.GetSiblingIndex() > 0)
         {
             return transform.GetChild(currentWaypoint.GetSiblingIndex() - 1);
-        } else {
-            return transform.GetChild(transform.childCount-1);
+        }
+        else
+        {
+            // Loop back to last waypoint
+            return transform.GetChild(transform.childCount - 1);
         }
     }
 

@@ -35,7 +35,8 @@ namespace PFNN_DEV
 		private Vector3[] Ups = new Vector3[0];
 		private Vector3[] Velocities = new Vector3[0];
 
-		private Transform currentWaypoint;
+		// Waypoints
+		private Transform CurrentWaypoint;
 		private Transform PreviousWaypoint;
 
 		//Trajectory for 60 Hz framerate
@@ -89,7 +90,7 @@ namespace PFNN_DEV
 		void Start()
 		{
 			Utility.SetFPS(60);
-			FollowWaypoints = Controller.initializeFirstWaypoint();
+			FollowWaypoints = Controller.InitializeFirstWaypoint();
 			if (FollowWaypoints)
 			{
 				Debug.Log("Following provided waypoints.");
@@ -107,17 +108,19 @@ namespace PFNN_DEV
 				return;
 			}
 
-			currentWaypoint = Controller.getCurrentWaypoint(transform.position);
-			PreviousWaypoint = Controller.GetPreviousWaypoint();
-
 			//Update Target Direction / Velocity
-
 			if (FollowWaypoints)
 			{
-				transform.LookAt(currentWaypoint);
-				TargetDirection = Vector3.Lerp(TargetDirection, transform.rotation * Vector3.forward, TargetBlending);
-				TargetVelocity = Vector3.Lerp(TargetVelocity, Controller.QueryMove(transform.position), TargetBlending);
+				// Get current and previous waypoints
+				CurrentWaypoint = Controller.GetCurrentWaypoint(transform.position);
+				PreviousWaypoint = Controller.GetPreviousWaypoint();
 
+				// Update target and direction based on waypoints
+				transform.LookAt(CurrentWaypoint);
+				TargetDirection = Vector3.Lerp(TargetDirection, transform.rotation * Vector3.forward, TargetBlending);
+				TargetVelocity = Vector3.Lerp(TargetVelocity, Controller.QueryMoveToWaypoint(transform.position), TargetBlending);
+
+				// For testing purposes only two styles have been added
 				// Stand
 				Trajectory.Points[RootPointIndex].Styles[0] = Utility.Interpolate(Trajectory.Points[RootPointIndex].Styles[0], 0f, GaitTransition);
 				// Walk
@@ -126,6 +129,7 @@ namespace PFNN_DEV
 			}
 			else
 			{
+				// If no waypoints provided use user input
 				TargetDirection = Vector3.Lerp(TargetDirection, Quaternion.AngleAxis(Controller.QueryTurn() * 60f, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection(), TargetBlending);
 				TargetVelocity = Vector3.Lerp(TargetVelocity, (Quaternion.LookRotation(TargetDirection, Vector3.up) * Controller.QueryMove()).normalized, TargetBlending);
 				for (int i = 0; i < Controller.Styles.Length; i++)
@@ -188,16 +192,16 @@ namespace PFNN_DEV
 
 			for (int i = RootPointIndex; i < Trajectory.Points.Length; i += PointDensity)
 			{
-				
+
 				if (FollowWaypoints)
 				{
-					Trajectory.Points[i].PostprocessWaypoints(currentWaypoint.position);
+					Trajectory.Points[i].PostprocessWaypoints(CurrentWaypoint.position);
 				}
 				else
 				{
 					Trajectory.Points[i].Postprocess();
 				}
-				
+
 			}
 
 			for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
@@ -295,7 +299,7 @@ namespace PFNN_DEV
 
 				if (FollowWaypoints)
 				{
-					Trajectory.Points[RootPointIndex].PostprocessWaypoints(currentWaypoint.position);
+					Trajectory.Points[RootPointIndex].PostprocessWaypoints(CurrentWaypoint.position);
 				}
 				else
 				{
@@ -341,7 +345,7 @@ namespace PFNN_DEV
 
 					if (FollowWaypoints)
 					{
-						Trajectory.Points[i].PostprocessWaypoints(currentWaypoint.position);
+						Trajectory.Points[i].PostprocessWaypoints(CurrentWaypoint.position);
 					}
 					else
 					{
