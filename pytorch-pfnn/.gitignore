@@ -1,8 +1,6 @@
 # Python gitignore ####################################################################################################
-# Ignore generated data files
-Input.txt
-Output.txt
-Phases.txt
+# Ignore data
+data/
 
 # Ignore saved weights
 weights/
