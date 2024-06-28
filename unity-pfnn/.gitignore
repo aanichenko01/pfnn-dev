@@ -7,6 +7,7 @@ Parameters.asset
 Parameters.asset.meta
 # Ignore Animations
 Assets/HumanMotion/
+
 # Ignore all meta files as unity regenerates them
 *.meta
 
