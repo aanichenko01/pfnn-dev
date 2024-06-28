@@ -84,6 +84,7 @@ public class MotionExporter : EditorWindow {
 
 					if(!Exporting) {
 						if(Utility.GUIButton("Export Data", UltiDraw.DarkGrey, UltiDraw.White)) {
+							Debug.Log("Starting to EXPORT DATA");
 							this.StartCoroutine(ExportData());
 						}
 
@@ -169,6 +170,8 @@ public class MotionExporter : EditorWindow {
 			Data Y = new Data(WriteData ? CreateFile("Output") : null, WriteNorm ? CreateFile("OutputNorm") : null, WriteLabels ? CreateFile("OutputLabels") : null);
 
 			for(int i=0; i<Editor.Files.Length; i++) {
+				// Check if actually trying to export
+				// Debug.Log(Editor.Files[i].Data.Export);
 				if(Editor.Files[i].Data.Export) {
 					Editor.LoadFile(Editor.Files[i]);
 					for(int m=1; m<=(Mirror ? 2 : 1); m++) {
@@ -204,6 +207,7 @@ public class MotionExporter : EditorWindow {
 								State next = states[j+1];
 
 								//Input --- REPLACE THIS WITH YOUR OWN INPUT EXPORTING FORMAT ---
+								// This is trajectory (both past and future)
 								for(int k=0; k<12; k++) {
 									Vector3 position = current.Trajectory.Points[k].GetPosition().GetRelativePositionTo(current.Root);
 									Vector3 direction = current.Trajectory.Points[k].GetDirection().GetRelativeDirectionTo(current.Root);
@@ -219,7 +223,11 @@ public class MotionExporter : EditorWindow {
 									X.Feed(speed, Data.ID.Standard, "Trajectory"+(k+1)+"Speed");
 									X.Feed(styles, Data.ID.Standard, "Trajectory"+(k+1)+"Style");
 								}
+
+								// This loops over all the joints
 								for(int k=0; k<current.Posture.Length; k++) {
+									// Check joint count
+									// Debug.Log(k);
 									Vector3 position = current.Posture[k].GetPosition().GetRelativePositionTo(previous.Root);
 									Vector3 forward = current.Posture[k].GetForward().GetRelativeDirectionTo(previous.Root);
 									Vector3 up = current.Posture[k].GetUp().GetRelativeDirectionTo(previous.Root);
@@ -241,6 +249,7 @@ public class MotionExporter : EditorWindow {
 								//
 
 								//Output --- REPLACE THIS WITH YOUR OWN OUTPUT EXPORTING FORMAT ---
+								// Predicted future trajectory
 								for(int k=6; k<12; k++) {
 									Vector3 position = next.Trajectory.Points[k].GetPosition().GetRelativePositionTo(next.Root);
 									Vector3 direction = next.Trajectory.Points[k].GetDirection().GetRelativeDirectionTo(next.Root);
@@ -252,6 +261,8 @@ public class MotionExporter : EditorWindow {
 									Y.Feed(velocity.x, Data.ID.Standard, "Trajectory"+(k+1)+"VelocityX");
 									Y.Feed(velocity.z, Data.ID.Standard, "Trajectory"+(k+1)+"VelocityZ");
 								}
+
+								// Predict joint rotations for all joints
 								for(int k=0; k<next.Posture.Length; k++) {
 									Vector3 position = next.Posture[k].GetPosition().GetRelativePositionTo(current.Root);
 									Vector3 forward = next.Posture[k].GetForward().GetRelativeDirectionTo(current.Root);

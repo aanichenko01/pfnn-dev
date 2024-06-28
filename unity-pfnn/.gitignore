@@ -5,6 +5,10 @@
 # Ingore model parameters (too big to store on GitHub but they are regenerated quickly)
 Parameters.asset
 Parameters.asset.meta
+# Ignore Animations
+Assets/HumanMotion/
+# Ignore all meta files as unity regenerates them
+*.meta
 
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #

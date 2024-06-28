@@ -142,7 +142,12 @@ public class FBXImporter : EditorWindow {
 			FileInfo[] items = info.GetFiles();
 			List<File> files = new List<File>();
 			for(int i=0; i<items.Length; i++) {
-				string path = items[i].FullName.Substring(items[i].FullName.IndexOf("Assets/"));
+				Debug.Log("Got here");
+
+				// Debug.Log(items[i].FullName);
+				// Debug.Log(items[i].FullName.Replace('\\', '/').IndexOf("Assets/"));
+				string path = items[i].FullName.Substring(items[i].FullName.Replace('\\', '/').IndexOf("Assets/"));
+				Debug.Log(path);
 				if((AnimationClip)AssetDatabase.LoadAssetAtPath(path, typeof(AnimationClip))) {
 					File file = new File();
 					file.Object = (GameObject)AssetDatabase.LoadAssetAtPath(path, typeof(GameObject));

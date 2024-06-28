@@ -1,0 +1,5 @@
+# Project Level gitignore
+
+# Ignore all data files
+Export/
+HumanMotionData/
