@@ -6,9 +6,9 @@ using DeepLearning;
 using UnityEditor;
 #endif
 
-namespace SIGGRAPH_2018 {
+namespace PFNN_DEV {
 	[RequireComponent(typeof(Actor))]
-	public class BioAnimation_Adam : MonoBehaviour {
+	public class BioAnimation_Mixamo : MonoBehaviour {
 
 		public bool Inspect = false;
 
@@ -145,9 +145,9 @@ namespace SIGGRAPH_2018 {
 			}
 
 			float[] style = Controller.GetStyle();
-			if(style[2] == 0f) {
-				style[1] = Mathf.Max(style[1], Mathf.Clamp(Trajectory.Points[RootPointIndex].GetVelocity().magnitude, 0f, 1f));
-			}
+			// if(style[2] == 0f) {
+			// 	style[1] = Mathf.Max(style[1], Mathf.Clamp(Trajectory.Points[RootPointIndex].GetVelocity().magnitude, 0f, 1f));
+			// }
 			for(int i=RootPointIndex; i<Trajectory.Points.Length; i++) {
 				float weight = (float)(i - RootPointIndex) / (float)FuturePoints; //w between 0 and 1
 				for(int j=0; j<Trajectory.Points[i].Styles.Length; j++) {
@@ -416,13 +416,13 @@ namespace SIGGRAPH_2018 {
 		}
 
 		#if UNITY_EDITOR
-		[CustomEditor(typeof(BioAnimation_Adam))]
+		[CustomEditor(typeof(BioAnimation_Mixamo))]
 		public class BioAnimation_Adam_Editor : Editor {
 
-			public BioAnimation_Adam Target;
+			public BioAnimation_Mixamo Target;
 
 			void Awake() {
-				Target = (BioAnimation_Adam)target;
+				Target = (BioAnimation_Mixamo)target;
 			}
 
 			public override void OnInspectorGUI() {
