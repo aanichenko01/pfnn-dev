@@ -6,8 +6,8 @@
 Parameters.asset
 Parameters.asset.meta
 
-# Ignore Animations
-Assets/HumanMotion/
+# Ignore All Animation/Rig Data
+Data/
 
 # Ignore Weights
 Weights/
