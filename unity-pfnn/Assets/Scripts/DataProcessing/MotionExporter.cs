@@ -224,7 +224,7 @@ public class MotionExporter : EditorWindow {
 									X.Feed(styles, Data.ID.Standard, "Trajectory"+(k+1)+"Style");
 								}
 
-								Debug.Log(current.Trajectory.Points[5].GetPhase());
+								// Debug.Log(current.Trajectory.Points[5].GetPhase());
 
 								// This loops over all the joints
 								for(int k=0; k<current.Posture.Length; k++) {

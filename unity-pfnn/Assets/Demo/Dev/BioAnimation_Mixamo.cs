@@ -15,6 +15,8 @@ namespace PFNN_DEV {
 		public bool ShowTrajectory = true;
 		public bool ShowVelocities = true;
 
+		public bool FollowWaypoints = false;
+
 		public float TargetGain = 0.25f;
 		public float TargetDecay = 0.05f;
 		public bool TrajectoryControl = true;
@@ -39,6 +41,9 @@ namespace PFNN_DEV {
 		private Vector3[] Forwards = new Vector3[0];
 		private Vector3[] Ups = new Vector3[0];
 		private Vector3[] Velocities = new Vector3[0];
+
+		// Waypoints
+		private Transform CurrentWaypoint;
 
 		//Trajectory for 60 Hz framerate
 		private const int Framerate = 60;
@@ -84,6 +89,16 @@ namespace PFNN_DEV {
 
 		void Start() {
 			Utility.SetFPS(60);
+
+			FollowWaypoints = Controller.InitializeFirstWaypoint();
+			if (FollowWaypoints)
+			{
+				Debug.Log("Following provided waypoints.");
+			}
+			else
+			{
+				Debug.Log("Controlling charachter using keyboard inputs.");
+			}
 		}
 
 		void Update() {
@@ -106,15 +121,29 @@ namespace PFNN_DEV {
 			//Calculate Bias
 			float bias = PoolBias();
 
-			//Determine Control
-			float turn = Controller.QueryTurn();
-			Vector3 move = Controller.QueryMove();
-			bool control = turn != 0f || move != Vector3.zero;
+			// TODO DELETE is placeholder
+			bool control = true;
 
-			//Update Target Direction / Velocity / Correction
-			TargetDirection = Vector3.Lerp(TargetDirection, Quaternion.AngleAxis(turn * 60f, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection(), control ? TargetGain : TargetDecay);
-			TargetVelocity = Vector3.Lerp(TargetVelocity, bias * (Quaternion.LookRotation(TargetDirection, Vector3.up) * move).normalized, control ? TargetGain : TargetDecay);
-			TrajectoryCorrection = Utility.Interpolate(TrajectoryCorrection, Mathf.Max(move.normalized.magnitude, Mathf.Abs(turn)), control ? TargetGain : TargetDecay);
+			if(FollowWaypoints) {
+				// Get current waypoint
+				CurrentWaypoint = Controller.GetCurrentWaypoint(transform.position);
+
+				// Update target and direction based on waypoints
+				transform.LookAt(CurrentWaypoint);
+				TargetDirection = Vector3.Lerp(TargetDirection, transform.rotation * Vector3.forward, TargetGain);
+				TargetVelocity = Vector3.Lerp(TargetVelocity, Controller.QueryMoveToWaypoint(transform.position), TargetGain);
+
+			} else {
+				//Determine Control
+				float turn = Controller.QueryTurn();
+				Vector3 move = Controller.QueryMove();
+				control = turn != 0f || move != Vector3.zero;
+
+				//Update Target Direction / Velocity / Correction
+				TargetDirection = Vector3.Lerp(TargetDirection, Quaternion.AngleAxis(turn * 60f, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection(), control ? TargetGain : TargetDecay);
+				TargetVelocity = Vector3.Lerp(TargetVelocity, bias * (Quaternion.LookRotation(TargetDirection, Vector3.up) * move).normalized, control ? TargetGain : TargetDecay);
+				TrajectoryCorrection = Utility.Interpolate(TrajectoryCorrection, Mathf.Max(move.normalized.magnitude, Mathf.Abs(turn)), control ? TargetGain : TargetDecay);
+			}
 
 			//Predict Future Trajectory
 			Vector3[] trajectory_positions_blend = new Vector3[Trajectory.Points.Length];
@@ -227,11 +256,17 @@ namespace PFNN_DEV {
 			Vector3 translationalOffset = Vector3.zero;
 			float rotationalOffset = 0f;
 			Vector3 rootMotion = new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0), NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 1), NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2));
+			Debug.Log(rootMotion);
 			rootMotion /= Framerate;
 			translationalOffset = rest * new Vector3(rootMotion.x, 0f, rootMotion.z);
 			rotationalOffset = rest * rootMotion.y;
 
-			Trajectory.Points[RootPointIndex].SetPosition(translationalOffset.GetRelativePositionFrom(currentRoot));
+
+			// Placeholer this will make the root move towards waypoint but incorrectly
+			// Trajectory.Points[RootPointIndex].SetPosition(Vector3.MoveTowards(Trajectory.Points[RootPointIndex].GetPosition(), CurrentWaypoint.position, 0.7f * Time.deltaTime));
+
+			// TODO currently NN is incorrectly predictiing root transformations (I think because of the way trajectory is being input)
+			// Trajectory.Points[RootPointIndex].SetPosition(translationalOffset.GetRelativePositionFrom(currentRoot));
 			Trajectory.Points[RootPointIndex].SetDirection(Quaternion.AngleAxis(rotationalOffset, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection());
 			Trajectory.Points[RootPointIndex].SetVelocity(translationalOffset.GetRelativeDirectionFrom(currentRoot) * Framerate);
 			Matrix4x4 nextRoot = Trajectory.Points[RootPointIndex].GetTransformation();

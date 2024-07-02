@@ -25,7 +25,7 @@ public class Waypoints : MonoBehaviour
         }
 
         // Close the loop from last waypoint to first
-        Gizmos.DrawLine(transform.GetChild(transform.childCount - 1).position, transform.GetChild(0).position);
+        // Gizmos.DrawLine(transform.GetChild(transform.childCount - 1).position, transform.GetChild(0).position);
 
     }
 
@@ -42,10 +42,15 @@ public class Waypoints : MonoBehaviour
         {
             return transform.GetChild(currentWaypoint.GetSiblingIndex() + 1);
         }
+        // else
+        // {
+        //     // Loop back to first waypoint
+        //     return transform.GetChild(0);
+        // }
         else
         {
-            // Loop back to first waypoint
-            return transform.GetChild(0);
+            // Return last waypoint so there is no loop
+            return currentWaypoint;
         }
     }
 
