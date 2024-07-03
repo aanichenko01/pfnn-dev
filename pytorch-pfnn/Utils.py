@@ -1,4 +1,4 @@
-
+# Cubic function for PFNN
 def cubic(y0, y1, y2, y3, mu):
     return (
         (-0.5*y0+1.5*y1-1.5*y2+0.5*y3)*mu*mu*mu + 
