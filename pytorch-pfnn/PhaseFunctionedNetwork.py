@@ -88,11 +88,11 @@ class PhaseFunctionedNetwork(nn.Module):
             b2 = cubic(self.hidden2.b[pindex_0], self.hidden2.b[pindex_1], self.hidden2.b[pindex_2], self.hidden2.b[pindex_3], pamount).cpu().detach().numpy()
             
             # save precomputed weights and biases
-            W0.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Demo/Dev/Weights/test/W0_%03i.bin' % i)
-            b0.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Demo/Dev/Weights/test/b0_%03i.bin' % i)
+            W0.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Dev/Weights/test/W0_%03i.bin' % i)
+            b0.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Dev/Weights/test/b0_%03i.bin' % i)
 
-            W1.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Demo/Dev/Weights/test/W1_%03i.bin' % i)
-            b1.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Demo/Dev/Weights/test/b1_%03i.bin' % i)
+            W1.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Dev/Weights/test/W1_%03i.bin' % i)
+            b1.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Dev/Weights/test/b1_%03i.bin' % i)
             
-            W2.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Demo/Dev/Weights/test/W2_%03i.bin' % i)
-            b2.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Demo/Dev/Weights/test/b2_%03i.bin' % i)
+            W2.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Dev/Weights/test/W2_%03i.bin' % i)
+            b2.astype(np.float32).tofile('C:/Users/Ana/Desktop/dev/pfnn-dev/unity-pfnn/Assets/Dev/Weights/test/b2_%03i.bin' % i)
