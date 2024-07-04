@@ -238,6 +238,10 @@ public static class Utility {
 		return position;
 	}
 
+	public static Vector3 ProjectJump() {
+		return new Vector3(0f, 0f, 0f);
+	}
+
 	public static float GetHeight(Vector3 origin, LayerMask mask) {
 		RaycastHit[] hits = Physics.RaycastAll(new Vector3(origin.x, 1000f, origin.z), Vector3.down, float.PositiveInfinity, mask);
 		if(hits.Length == 0) {
