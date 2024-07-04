@@ -6,14 +6,18 @@ using DeepLearning;
 using UnityEditor;
 #endif
 
-namespace PFNN_DEV {
+namespace PFNN_DEV
+{
 	[RequireComponent(typeof(Actor))]
-	public class BioAnimation_F42 : MonoBehaviour {
+	public class BioAnimation_F42 : MonoBehaviour
+	{
 
 		public bool Inspect = false;
 
 		public bool ShowTrajectory = true;
 		public bool ShowVelocities = true;
+
+		public bool FollowWaypoints = false;
 
 		public float TargetGain = 0.25f;
 		public float TargetDecay = 0.05f;
@@ -40,6 +44,9 @@ namespace PFNN_DEV {
 		private Vector3[] Ups = new Vector3[0];
 		private Vector3[] Velocities = new Vector3[0];
 
+		// Waypoints
+		private Transform CurrentWaypoint;
+
 		//Trajectory for 60 Hz framerate
 		private const int Framerate = 60;
 		private const int Points = 111;
@@ -49,11 +56,13 @@ namespace PFNN_DEV {
 		private const int RootPointIndex = 60;
 		private const int PointDensity = 10;
 
-		void Reset() {
+		void Reset()
+		{
 			Controller = new Controller();
 		}
 
-		void Awake() {
+		void Awake()
+		{
 			Actor = GetComponent<Actor>();
 			NN = GetComponent<PFNN>();
 			TargetDirection = new Vector3(transform.forward.x, 0f, transform.forward.z);
@@ -63,63 +72,98 @@ namespace PFNN_DEV {
 			Ups = new Vector3[Actor.Bones.Length];
 			Velocities = new Vector3[Actor.Bones.Length];
 			Trajectory = new Trajectory(Points, Controller.GetNames(), transform.position, TargetDirection);
-			if(Controller.Styles.Length > 0) {
-				for(int i=0; i<Trajectory.Points.Length; i++) {
+			if (Controller.Styles.Length > 0)
+			{
+				for (int i = 0; i < Trajectory.Points.Length; i++)
+				{
 					Trajectory.Points[i].Styles[0] = 1f;
 				}
 			}
-			for(int i=0; i<Actor.Bones.Length; i++) {
+			for (int i = 0; i < Actor.Bones.Length; i++)
+			{
 				Positions[i] = Actor.Bones[i].Transform.position;
 				Forwards[i] = Actor.Bones[i].Transform.forward;
 				Ups[i] = Actor.Bones[i].Transform.up;
 				Velocities[i] = Vector3.zero;
 			}
 
-			if(NN.Parameters == null) {
+			if (NN.Parameters == null)
+			{
 				Debug.Log("No parameters saved.");
 				return;
 			}
 			NN.LoadParameters();
 		}
 
-		void Start() {
+		void Start()
+		{
 			Utility.SetFPS(60);
+
+			FollowWaypoints = Controller.InitializeFirstWaypoint();
+			if (FollowWaypoints)
+			{
+				Debug.Log("Following provided waypoints.");
+			}
+			else
+			{
+				Debug.Log("Controlling charachter using keyboard inputs.");
+			}
 		}
 
-		void Update() {
-			if(NN.Parameters == null) {
+		void Update()
+		{
+			if (NN.Parameters == null)
+			{
 				return;
 			}
 
-			if(TrajectoryControl) {
+			if (TrajectoryControl)
+			{
 				PredictTrajectory();
 			}
 
-			if(NN.Parameters != null) {
+			if (NN.Parameters != null)
+			{
 				Animate();
 			}
 
 			transform.position = Trajectory.Points[RootPointIndex].GetPosition();
 		}
 
-		private void PredictTrajectory() {
+		private void PredictTrajectory()
+		{
 			//Calculate Bias
 			float bias = PoolBias();
 
-			//Determine Control
-			float turn = Controller.QueryTurn();
-			Vector3 move = Controller.QueryMove();
-			bool control = turn != 0f || move != Vector3.zero;
+			// TODO DELETE is placeholder
+			bool control = true;
 
-			//Update Target Direction / Velocity / Correction
-			TargetDirection = Vector3.Lerp(TargetDirection, Quaternion.AngleAxis(turn * 60f, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection(), control ? TargetGain : TargetDecay);
-			TargetVelocity = Vector3.Lerp(TargetVelocity, bias * (Quaternion.LookRotation(TargetDirection, Vector3.up) * move).normalized, control ? TargetGain : TargetDecay);
-			TrajectoryCorrection = Utility.Interpolate(TrajectoryCorrection, Mathf.Max(move.normalized.magnitude, Mathf.Abs(turn)), control ? TargetGain : TargetDecay);
+			if(FollowWaypoints) {
+				// Get current waypoint
+				CurrentWaypoint = Controller.GetCurrentWaypoint(transform.position);
+
+				// Update target and direction based on waypoints
+				transform.LookAt(CurrentWaypoint);
+				TargetDirection = Vector3.Lerp(TargetDirection, transform.rotation * Vector3.forward, TargetGain);
+				TargetVelocity = Vector3.Lerp(TargetVelocity, Controller.QueryMoveToWaypoint(transform.position), TargetGain);
+
+			} else {
+				//Determine Control
+				float turn = Controller.QueryTurn();
+				Vector3 move = Controller.QueryMove();
+				control = turn != 0f || move != Vector3.zero;
+
+				//Update Target Direction / Velocity / Correction
+				TargetDirection = Vector3.Lerp(TargetDirection, Quaternion.AngleAxis(turn * 60f, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection(), control ? TargetGain : TargetDecay);
+				TargetVelocity = Vector3.Lerp(TargetVelocity, bias * (Quaternion.LookRotation(TargetDirection, Vector3.up) * move).normalized, control ? TargetGain : TargetDecay);
+				TrajectoryCorrection = Utility.Interpolate(TrajectoryCorrection, Mathf.Max(move.normalized.magnitude, Mathf.Abs(turn)), control ? TargetGain : TargetDecay);
+			}
 
 			//Predict Future Trajectory
 			Vector3[] trajectory_positions_blend = new Vector3[Trajectory.Points.Length];
 			trajectory_positions_blend[RootPointIndex] = Trajectory.Points[RootPointIndex].GetTransformation().GetPosition();
-			for(int i=RootPointIndex+1; i<Trajectory.Points.Length; i++) {
+			for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
+			{
 				float bias_pos = 0.75f;
 				float bias_dir = 1.25f;
 				float bias_vel = 1.50f;
@@ -130,9 +174,9 @@ namespace PFNN_DEV {
 
 				float scale = 1f / (Trajectory.Points.Length - (RootPointIndex + 1f));
 
-				trajectory_positions_blend[i] = trajectory_positions_blend[i-1] + 
+				trajectory_positions_blend[i] = trajectory_positions_blend[i - 1] +
 					Vector3.Lerp(
-					Trajectory.Points[i].GetPosition() - Trajectory.Points[i-1].GetPosition(), 
+					Trajectory.Points[i].GetPosition() - Trajectory.Points[i - 1].GetPosition(),
 					scale * TargetVelocity,
 					scale_pos
 					);
@@ -140,7 +184,8 @@ namespace PFNN_DEV {
 				Trajectory.Points[i].SetDirection(Vector3.Lerp(Trajectory.Points[i].GetDirection(), TargetDirection, scale_dir));
 				Trajectory.Points[i].SetVelocity(Vector3.Lerp(Trajectory.Points[i].GetVelocity(), TargetVelocity, scale_vel));
 			}
-			for(int i=RootPointIndex+1; i<Trajectory.Points.Length; i++) {
+			for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
+			{
 				Trajectory.Points[i].SetPosition(trajectory_positions_blend[i]);
 			}
 
@@ -149,9 +194,11 @@ namespace PFNN_DEV {
 			// if(style[2] == 0f) {
 			// style[1] = Mathf.Max(style[1], Mathf.Clamp(Trajectory.Points[RootPointIndex].GetVelocity().magnitude, 0f, 1f));
 			// }
-			for(int i=RootPointIndex; i<Trajectory.Points.Length; i++) {
+			for (int i = RootPointIndex; i < Trajectory.Points.Length; i++)
+			{
 				float weight = (float)(i - RootPointIndex) / (float)FuturePoints; //w between 0 and 1
-				for(int j=0; j<Trajectory.Points[i].Styles.Length; j++) {
+				for (int j = 0; j < Trajectory.Points[i].Styles.Length; j++)
+				{
 					Trajectory.Points[i].Styles[j] = Utility.Interpolate(Trajectory.Points[i].Styles[j], style[j], Utility.Normalise(weight, 0f, 1f, Controller.Styles[j].Transition, 1f));
 				}
 				Utility.Normalise(ref Trajectory.Points[i].Styles);
@@ -159,69 +206,75 @@ namespace PFNN_DEV {
 			}
 		}
 
-		private void Animate() {
+		private void Animate()
+		{
 			//Calculate Root
 			Matrix4x4 currentRoot = Trajectory.Points[RootPointIndex].GetTransformation();
-			currentRoot[1,3] = 0f; //For flat terrain
+			currentRoot[1, 3] = 0f; //For flat terrain
 
 			int start = 0;
 			//Input Trajectory Positions / Directions / Velocities / Styles
-			for(int i=0; i<PointSamples; i++) {
+			for (int i = 0; i < PointSamples; i++)
+			{
 				Vector3 pos = GetSample(i).GetPosition().GetRelativePositionTo(currentRoot);
 				Vector3 dir = GetSample(i).GetDirection().GetRelativeDirectionTo(currentRoot);
 				Vector3 vel = GetSample(i).GetVelocity().GetRelativeDirectionTo(currentRoot);
 				float speed = GetSample(i).GetSpeed();
-				NN.SetInput(start + i*TrajectoryDimIn + 0, pos.x);
-				NN.SetInput(start + i*TrajectoryDimIn + 1, pos.y);
-				NN.SetInput(start + i*TrajectoryDimIn + 2, pos.z);
-				NN.SetInput(start + i*TrajectoryDimIn + 3, dir.x);
-				NN.SetInput(start + i*TrajectoryDimIn + 4, dir.z);
-				NN.SetInput(start + i*TrajectoryDimIn + 5, vel.x);
-				NN.SetInput(start + i*TrajectoryDimIn + 6, vel.z);
-				NN.SetInput(start + i*TrajectoryDimIn + 7, speed);
-				for(int j=0; j<Controller.Styles.Length; j++) {
-					NN.SetInput(start + i*TrajectoryDimIn + (TrajectoryDimIn - Controller.Styles.Length) + j, GetSample(i).Styles[j]);
+				NN.SetInput(start + i * TrajectoryDimIn + 0, pos.x);
+				NN.SetInput(start + i * TrajectoryDimIn + 1, pos.y);
+				NN.SetInput(start + i * TrajectoryDimIn + 2, pos.z);
+				NN.SetInput(start + i * TrajectoryDimIn + 3, dir.x);
+				NN.SetInput(start + i * TrajectoryDimIn + 4, dir.z);
+				NN.SetInput(start + i * TrajectoryDimIn + 5, vel.x);
+				NN.SetInput(start + i * TrajectoryDimIn + 6, vel.z);
+				NN.SetInput(start + i * TrajectoryDimIn + 7, speed);
+				for (int j = 0; j < Controller.Styles.Length; j++)
+				{
+					NN.SetInput(start + i * TrajectoryDimIn + (TrajectoryDimIn - Controller.Styles.Length) + j, GetSample(i).Styles[j]);
 				}
 			}
-			start += TrajectoryDimIn*PointSamples;
+			start += TrajectoryDimIn * PointSamples;
 
-			Matrix4x4 previousRoot = Trajectory.Points[RootPointIndex-1].GetTransformation();
-			previousRoot[1,3] = 0f; //For flat terrain
+			Matrix4x4 previousRoot = Trajectory.Points[RootPointIndex - 1].GetTransformation();
+			previousRoot[1, 3] = 0f; //For flat terrain
 
 			//Input Previous Bone Positions / Velocities
-			for(int i=0; i<Actor.Bones.Length; i++) {
+			for (int i = 0; i < Actor.Bones.Length; i++)
+			{
 				Vector3 pos = Positions[i].GetRelativePositionTo(previousRoot);
 				Vector3 forward = Forwards[i].GetRelativeDirectionTo(previousRoot);
 				Vector3 up = Ups[i].GetRelativeDirectionTo(previousRoot);
 				Vector3 vel = Velocities[i].GetRelativeDirectionTo(previousRoot);
-				NN.SetInput(start + i*JointDimIn + 0, pos.x);
-				NN.SetInput(start + i*JointDimIn + 1, pos.y);
-				NN.SetInput(start + i*JointDimIn + 2, pos.z);
-				NN.SetInput(start + i*JointDimIn + 3, forward.x);
-				NN.SetInput(start + i*JointDimIn + 4, forward.y);
-				NN.SetInput(start + i*JointDimIn + 5, forward.z);
-				NN.SetInput(start + i*JointDimIn + 6, up.x);
-				NN.SetInput(start + i*JointDimIn + 7, up.y);
-				NN.SetInput(start + i*JointDimIn + 8, up.z);
-				NN.SetInput(start + i*JointDimIn + 9, vel.x);
-				NN.SetInput(start + i*JointDimIn + 10, vel.y);
-				NN.SetInput(start + i*JointDimIn + 11, vel.z);
+				NN.SetInput(start + i * JointDimIn + 0, pos.x);
+				NN.SetInput(start + i * JointDimIn + 1, pos.y);
+				NN.SetInput(start + i * JointDimIn + 2, pos.z);
+				NN.SetInput(start + i * JointDimIn + 3, forward.x);
+				NN.SetInput(start + i * JointDimIn + 4, forward.y);
+				NN.SetInput(start + i * JointDimIn + 5, forward.z);
+				NN.SetInput(start + i * JointDimIn + 6, up.x);
+				NN.SetInput(start + i * JointDimIn + 7, up.y);
+				NN.SetInput(start + i * JointDimIn + 8, up.z);
+				NN.SetInput(start + i * JointDimIn + 9, vel.x);
+				NN.SetInput(start + i * JointDimIn + 10, vel.y);
+				NN.SetInput(start + i * JointDimIn + 11, vel.z);
 			}
-			start += JointDimIn*Actor.Bones.Length;
+			start += JointDimIn * Actor.Bones.Length;
 
 			//Predict
-			float rest = Mathf.Pow(1.0f-Trajectory.Points[RootPointIndex].Styles[0], 0.25f);
+			float rest = Mathf.Pow(1.0f - Trajectory.Points[RootPointIndex].Styles[0], 0.25f);
 			((PFNN)NN).SetDamping(1f - (rest * 0.9f + 0.1f));
 			NN.Predict();
 
 			//Update Past Trajectory
-			for(int i=0; i<RootPointIndex; i++) {
-				Trajectory.Points[i].SetPosition(Trajectory.Points[i+1].GetPosition());
-				Trajectory.Points[i].SetDirection(Trajectory.Points[i+1].GetDirection());
-				Trajectory.Points[i].SetVelocity(Trajectory.Points[i+1].GetVelocity());
-				Trajectory.Points[i].SetSpeed(Trajectory.Points[i+1].GetSpeed());
-				for(int j=0; j<Trajectory.Points[i].Styles.Length; j++) {
-					Trajectory.Points[i].Styles[j] = Trajectory.Points[i+1].Styles[j];
+			for (int i = 0; i < RootPointIndex; i++)
+			{
+				Trajectory.Points[i].SetPosition(Trajectory.Points[i + 1].GetPosition());
+				Trajectory.Points[i].SetDirection(Trajectory.Points[i + 1].GetDirection());
+				Trajectory.Points[i].SetVelocity(Trajectory.Points[i + 1].GetVelocity());
+				Trajectory.Points[i].SetSpeed(Trajectory.Points[i + 1].GetSpeed());
+				for (int j = 0; j < Trajectory.Points[i].Styles.Length; j++)
+				{
+					Trajectory.Points[i].Styles[j] = Trajectory.Points[i + 1].Styles[j];
 				}
 			}
 
@@ -231,7 +284,7 @@ namespace PFNN_DEV {
 			// Debug.Log($"X: {TrajectoryDimOut*7 + JointDimOut*Actor.Bones.Length + 0}");
 			// Debug.Log($"Y: {TrajectoryDimOut*7 + JointDimOut*Actor.Bones.Length + 1}");
 			// Debug.Log($"Z: {TrajectoryDimOut*7 + JointDimOut*Actor.Bones.Length + 2}");
-			Vector3 rootMotion = new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0), NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 1), NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2));
+			Vector3 rootMotion = new Vector3(NN.GetOutput(TrajectoryDimOut * 6 + JointDimOut * Actor.Bones.Length + 0), NN.GetOutput(TrajectoryDimOut * 6 + JointDimOut * Actor.Bones.Length + 1), NN.GetOutput(TrajectoryDimOut * 6 + JointDimOut * Actor.Bones.Length + 2));
 			rootMotion /= Framerate;
 			translationalOffset = rest * new Vector3(rootMotion.x, 0f, rootMotion.z);
 			rotationalOffset = rest * rootMotion.y;
@@ -240,16 +293,18 @@ namespace PFNN_DEV {
 			Trajectory.Points[RootPointIndex].SetDirection(Quaternion.AngleAxis(rotationalOffset, Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection());
 			Trajectory.Points[RootPointIndex].SetVelocity(translationalOffset.GetRelativeDirectionFrom(currentRoot) * Framerate);
 			Matrix4x4 nextRoot = Trajectory.Points[RootPointIndex].GetTransformation();
-			nextRoot[1,3] = 0f; //For flat terrain
+			nextRoot[1, 3] = 0f; //For flat terrain
 
 			//Update Future Trajectory
-			for(int i=RootPointIndex+1; i<Trajectory.Points.Length; i++) {
-				Trajectory.Points[i].SetPosition(Trajectory.Points[i].GetPosition() + rest*translationalOffset.GetRelativeDirectionFrom(nextRoot));
+			for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
+			{
+				Trajectory.Points[i].SetPosition(Trajectory.Points[i].GetPosition() + rest * translationalOffset.GetRelativeDirectionFrom(nextRoot));
 				Trajectory.Points[i].SetDirection(Quaternion.AngleAxis(rotationalOffset, Vector3.up) * Trajectory.Points[i].GetDirection());
 				Trajectory.Points[i].SetVelocity(Trajectory.Points[i].GetVelocity() + translationalOffset.GetRelativeDirectionFrom(nextRoot) * Framerate);
 			}
 			start = 0;
-			for(int i=RootPointIndex+1; i<Trajectory.Points.Length; i++) {
+			for (int i = RootPointIndex + 1; i < Trajectory.Points.Length; i++)
+			{
 				//ROOT	1		2		3		4		5
 				//.x....x.......x.......x.......x.......x
 				int index = i;
@@ -258,35 +313,35 @@ namespace PFNN_DEV {
 				float factor = (float)(i % PointDensity) / PointDensity;
 
 				Vector3 prevPos = new Vector3(
-					NN.GetOutput(start + (prevSampleIndex-6)*TrajectoryDimOut + 0),
+					NN.GetOutput(start + (prevSampleIndex - 6) * TrajectoryDimOut + 0),
 					0f,
-					NN.GetOutput(start + (prevSampleIndex-6)*TrajectoryDimOut + 1)
+					NN.GetOutput(start + (prevSampleIndex - 6) * TrajectoryDimOut + 1)
 				).GetRelativePositionFrom(nextRoot);
 				Vector3 prevDir = new Vector3(
-					NN.GetOutput(start + (prevSampleIndex-6)*TrajectoryDimOut + 2),
+					NN.GetOutput(start + (prevSampleIndex - 6) * TrajectoryDimOut + 2),
 					0f,
-					NN.GetOutput(start + (prevSampleIndex-6)*TrajectoryDimOut + 3)
+					NN.GetOutput(start + (prevSampleIndex - 6) * TrajectoryDimOut + 3)
 				).normalized.GetRelativeDirectionFrom(nextRoot);
 				Vector3 prevVel = new Vector3(
-					NN.GetOutput(start + (prevSampleIndex-6)*TrajectoryDimOut + 4),
+					NN.GetOutput(start + (prevSampleIndex - 6) * TrajectoryDimOut + 4),
 					0f,
-					NN.GetOutput(start + (prevSampleIndex-6)*TrajectoryDimOut + 5)
+					NN.GetOutput(start + (prevSampleIndex - 6) * TrajectoryDimOut + 5)
 				).GetRelativeDirectionFrom(nextRoot);
 
 				Vector3 nextPos = new Vector3(
-					NN.GetOutput(start + (nextSampleIndex-6)*TrajectoryDimOut + 0),
+					NN.GetOutput(start + (nextSampleIndex - 6) * TrajectoryDimOut + 0),
 					0f,
-					NN.GetOutput(start + (nextSampleIndex-6)*TrajectoryDimOut + 1)
+					NN.GetOutput(start + (nextSampleIndex - 6) * TrajectoryDimOut + 1)
 				).GetRelativePositionFrom(nextRoot);
 				Vector3 nextDir = new Vector3(
-					NN.GetOutput(start + (nextSampleIndex-6)*TrajectoryDimOut + 2),
+					NN.GetOutput(start + (nextSampleIndex - 6) * TrajectoryDimOut + 2),
 					0f,
-					NN.GetOutput(start + (nextSampleIndex-6)*TrajectoryDimOut + 3)
+					NN.GetOutput(start + (nextSampleIndex - 6) * TrajectoryDimOut + 3)
 				).normalized.GetRelativeDirectionFrom(nextRoot);
 				Vector3 nextVel = new Vector3(
-					NN.GetOutput(start + (nextSampleIndex-6)*TrajectoryDimOut + 4),
+					NN.GetOutput(start + (nextSampleIndex - 6) * TrajectoryDimOut + 4),
 					0f,
-					NN.GetOutput(start + (nextSampleIndex-6)*TrajectoryDimOut + 5)
+					NN.GetOutput(start + (nextSampleIndex - 6) * TrajectoryDimOut + 5)
 				).GetRelativeDirectionFrom(nextRoot);
 
 				Vector3 pos = (1f - factor) * prevPos + factor * nextPos;
@@ -317,44 +372,52 @@ namespace PFNN_DEV {
 						)
 					);
 			}
-			start += TrajectoryDimOut*6;
+			start += TrajectoryDimOut * 6;
 
 			//Compute Posture
-			for(int i=0; i<Actor.Bones.Length; i++) {
-				Vector3 position = new Vector3(NN.GetOutput(start + i*JointDimOut + 0), NN.GetOutput(start + i*JointDimOut + 1), NN.GetOutput(start + i*JointDimOut + 2)).GetRelativePositionFrom(currentRoot);
-				Vector3 forward = new Vector3(NN.GetOutput(start + i*JointDimOut + 3), NN.GetOutput(start + i*JointDimOut + 4), NN.GetOutput(start + i*JointDimOut + 5)).normalized.GetRelativeDirectionFrom(currentRoot);
-				Vector3 up = new Vector3(NN.GetOutput(start + i*JointDimOut + 6), NN.GetOutput(start + i*JointDimOut + 7), NN.GetOutput(start + i*JointDimOut + 8)).normalized.GetRelativeDirectionFrom(currentRoot);
-				Vector3 velocity = new Vector3(NN.GetOutput(start + i*JointDimOut + 9), NN.GetOutput(start + i*JointDimOut + 10), NN.GetOutput(start + i*JointDimOut + 11)).GetRelativeDirectionFrom(currentRoot);
+			for (int i = 0; i < Actor.Bones.Length; i++)
+			{
+				Vector3 position = new Vector3(NN.GetOutput(start + i * JointDimOut + 0), NN.GetOutput(start + i * JointDimOut + 1), NN.GetOutput(start + i * JointDimOut + 2)).GetRelativePositionFrom(currentRoot);
+				Vector3 forward = new Vector3(NN.GetOutput(start + i * JointDimOut + 3), NN.GetOutput(start + i * JointDimOut + 4), NN.GetOutput(start + i * JointDimOut + 5)).normalized.GetRelativeDirectionFrom(currentRoot);
+				Vector3 up = new Vector3(NN.GetOutput(start + i * JointDimOut + 6), NN.GetOutput(start + i * JointDimOut + 7), NN.GetOutput(start + i * JointDimOut + 8)).normalized.GetRelativeDirectionFrom(currentRoot);
+				Vector3 velocity = new Vector3(NN.GetOutput(start + i * JointDimOut + 9), NN.GetOutput(start + i * JointDimOut + 10), NN.GetOutput(start + i * JointDimOut + 11)).GetRelativeDirectionFrom(currentRoot);
 
 				Positions[i] = Vector3.Lerp(Positions[i] + velocity / Framerate, position, 0.5f);
 				Forwards[i] = forward;
 				Ups[i] = up;
 				Velocities[i] = velocity;
 			}
-			start += JointDimOut*Actor.Bones.Length;
-			
+			start += JointDimOut * Actor.Bones.Length;
+
 			//Assign Posture
 			transform.position = nextRoot.GetPosition();
 			transform.rotation = nextRoot.GetRotation();
-			for(int i=0; i<Actor.Bones.Length; i++) {
+			for (int i = 0; i < Actor.Bones.Length; i++)
+			{
 				Actor.Bones[i].Transform.position = Positions[i];
 				Actor.Bones[i].Transform.rotation = Quaternion.LookRotation(Forwards[i], Ups[i]);
 			}
 		}
 
-		private float PoolBias() {
+		private float PoolBias()
+		{
 			float[] styles = Trajectory.Points[RootPointIndex].Styles;
 			float bias = 0f;
-			for(int i=0; i<styles.Length; i++) {
+			for (int i = 0; i < styles.Length; i++)
+			{
 				float _bias = Controller.Styles[i].Bias;
 				float max = 0f;
-				for(int j=0; j<Controller.Styles[i].Multipliers.Length; j++) {
-					if(Input.GetKey(Controller.Styles[i].Multipliers[j].Key)) {
+				for (int j = 0; j < Controller.Styles[i].Multipliers.Length; j++)
+				{
+					if (Input.GetKey(Controller.Styles[i].Multipliers[j].Key))
+					{
 						max = Mathf.Max(max, Controller.Styles[i].Bias * Controller.Styles[i].Multipliers[j].Value);
 					}
 				}
-				for(int j=0; j<Controller.Styles[i].Multipliers.Length; j++) {
-					if(Input.GetKey(Controller.Styles[i].Multipliers[j].Key)) {
+				for (int j = 0; j < Controller.Styles[i].Multipliers.Length; j++)
+				{
+					if (Input.GetKey(Controller.Styles[i].Multipliers[j].Key))
+					{
 						_bias = Mathf.Min(max, _bias * Controller.Styles[i].Multipliers[j].Value);
 					}
 				}
@@ -363,29 +426,39 @@ namespace PFNN_DEV {
 			return bias;
 		}
 
-		private Trajectory.Point GetSample(int index) {
-			return Trajectory.Points[Mathf.Clamp(index*10, 0, Trajectory.Points.Length-1)];
+		private Trajectory.Point GetSample(int index)
+		{
+			return Trajectory.Points[Mathf.Clamp(index * 10, 0, Trajectory.Points.Length - 1)];
 		}
 
-		private Trajectory.Point GetPreviousSample(int index) {
+		private Trajectory.Point GetPreviousSample(int index)
+		{
 			return GetSample(index / 10);
 		}
 
-		private Trajectory.Point GetNextSample(int index) {
-			if(index % 10 == 0) {
+		private Trajectory.Point GetNextSample(int index)
+		{
+			if (index % 10 == 0)
+			{
 				return GetSample(index / 10);
-			} else {
+			}
+			else
+			{
 				return GetSample(index / 10 + 1);
 			}
 		}
 
-		void OnRenderObject() {
-			if(Application.isPlaying) {
-				if(NN.Parameters == null) {
+		void OnRenderObject()
+		{
+			if (Application.isPlaying)
+			{
+				if (NN.Parameters == null)
+				{
 					return;
 				}
 
-				if(ShowTrajectory) {
+				if (ShowTrajectory)
+				{
 					UltiDraw.Begin();
 					UltiDraw.DrawLine(Trajectory.Points[RootPointIndex].GetPosition(), Trajectory.Points[RootPointIndex].GetPosition() + TargetDirection, 0.05f, 0f, UltiDraw.Red.Transparent(0.75f));
 					UltiDraw.DrawLine(Trajectory.Points[RootPointIndex].GetPosition(), Trajectory.Points[RootPointIndex].GetPosition() + TargetVelocity, 0.05f, 0f, UltiDraw.Green.Transparent(0.75f));
@@ -393,9 +466,11 @@ namespace PFNN_DEV {
 					Trajectory.Draw(10);
 				}
 
-				if(ShowVelocities) {
+				if (ShowVelocities)
+				{
 					UltiDraw.Begin();
-					for(int i=0; i<Actor.Bones.Length; i++) {
+					for (int i = 0; i < Actor.Bones.Length; i++)
+					{
 						UltiDraw.DrawArrow(
 							Actor.Bones[i].Transform.position,
 							Actor.Bones[i].Transform.position + Velocities[i],
@@ -414,44 +489,55 @@ namespace PFNN_DEV {
 			}
 		}
 
-		void OnDrawGizmos() {
-			if(!Application.isPlaying) {
+		void OnDrawGizmos()
+		{
+			if (!Application.isPlaying)
+			{
 				OnRenderObject();
 			}
 		}
 
-		#if UNITY_EDITOR
+#if UNITY_EDITOR
 		[CustomEditor(typeof(BioAnimation_F42))]
-		public class BioAnimation_F42_Editor : Editor {
+		public class BioAnimation_F42_Editor : Editor
+		{
 
 			public BioAnimation_F42 Target;
 
-			void Awake() {
+			void Awake()
+			{
 				Target = (BioAnimation_F42)target;
 			}
 
-			public override void OnInspectorGUI() {
+			public override void OnInspectorGUI()
+			{
 				Undo.RecordObject(Target, Target.name);
 
 				Inspector();
 				Target.Controller.Inspector();
 
-				if(GUI.changed) {
+				if (GUI.changed)
+				{
 					EditorUtility.SetDirty(Target);
 				}
 			}
 
-			private void Inspector() {
+			private void Inspector()
+			{
 				Utility.SetGUIColor(UltiDraw.Grey);
-				using(new EditorGUILayout.VerticalScope ("Box")) {
+				using (new EditorGUILayout.VerticalScope("Box"))
+				{
 					Utility.ResetGUIColor();
 
-					if(Utility.GUIButton("Animation", UltiDraw.DarkGrey, UltiDraw.White)) {
+					if (Utility.GUIButton("Animation", UltiDraw.DarkGrey, UltiDraw.White))
+					{
 						Target.Inspect = !Target.Inspect;
 					}
 
-					if(Target.Inspect) {
-						using(new EditorGUILayout.VerticalScope ("Box")) {
+					if (Target.Inspect)
+					{
+						using (new EditorGUILayout.VerticalScope("Box"))
+						{
 							Target.TrajectoryDimIn = EditorGUILayout.IntField("Trajectory Dim X", Target.TrajectoryDimIn);
 							Target.TrajectoryDimOut = EditorGUILayout.IntField("Trajectory Dim Y", Target.TrajectoryDimOut);
 							Target.JointDimIn = EditorGUILayout.IntField("Joint Dim X", Target.JointDimIn);
@@ -467,6 +553,6 @@ namespace PFNN_DEV {
 				}
 			}
 		}
-		#endif
+#endif
 	}
 }
