@@ -138,9 +138,9 @@ public class Frame
 				currentHipPosition.z
 			);
 			// Check trajectory is not sinking into the ground
-			// if(jumpRootPostion.y < currentGroundPosition.y){
-			// 	jumpRootPostion.y  = currentGroundPosition.y;
-			// }
+			if(jumpRootPostion.y < currentGroundPosition.y){
+				jumpRootPostion.y  = currentGroundPosition.y;
+			}
 
 			return jumpRootPostion;
 		}

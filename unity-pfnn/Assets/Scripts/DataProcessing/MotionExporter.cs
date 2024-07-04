@@ -215,6 +215,7 @@ public class MotionExporter : EditorWindow {
 									float speed = current.Trajectory.Points[k].GetSpeed();
 									float[] styles = Filter(ref current.Trajectory.Points[k].Styles, ref current.Trajectory.Styles, ref Styles);
 									X.Feed(position.x, Data.ID.Standard, "Trajectory"+(k+1)+"PositionX");
+									X.Feed(position.y, Data.ID.Standard, "Trajectory"+(k+1)+"PositionY");
 									X.Feed(position.z, Data.ID.Standard, "Trajectory"+(k+1)+"PositionZ");
 									X.Feed(direction.x, Data.ID.Standard, "Trajectory"+(k+1)+"DirectionX");
 									X.Feed(direction.z, Data.ID.Standard, "Trajectory"+(k+1)+"DirectionZ");

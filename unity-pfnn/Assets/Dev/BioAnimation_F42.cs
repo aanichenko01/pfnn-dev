@@ -172,12 +172,13 @@ namespace PFNN_DEV {
 				Vector3 vel = GetSample(i).GetVelocity().GetRelativeDirectionTo(currentRoot);
 				float speed = GetSample(i).GetSpeed();
 				NN.SetInput(start + i*TrajectoryDimIn + 0, pos.x);
-				NN.SetInput(start + i*TrajectoryDimIn + 1, pos.z);
-				NN.SetInput(start + i*TrajectoryDimIn + 2, dir.x);
-				NN.SetInput(start + i*TrajectoryDimIn + 3, dir.z);
-				NN.SetInput(start + i*TrajectoryDimIn + 4, vel.x);
-				NN.SetInput(start + i*TrajectoryDimIn + 5, vel.z);
-				NN.SetInput(start + i*TrajectoryDimIn + 6, speed);
+				NN.SetInput(start + i*TrajectoryDimIn + 1, pos.y);
+				NN.SetInput(start + i*TrajectoryDimIn + 2, pos.z);
+				NN.SetInput(start + i*TrajectoryDimIn + 3, dir.x);
+				NN.SetInput(start + i*TrajectoryDimIn + 4, dir.z);
+				NN.SetInput(start + i*TrajectoryDimIn + 5, vel.x);
+				NN.SetInput(start + i*TrajectoryDimIn + 6, vel.z);
+				NN.SetInput(start + i*TrajectoryDimIn + 7, speed);
 				for(int j=0; j<Controller.Styles.Length; j++) {
 					NN.SetInput(start + i*TrajectoryDimIn + (TrajectoryDimIn - Controller.Styles.Length) + j, GetSample(i).Styles[j]);
 				}
@@ -227,6 +228,9 @@ namespace PFNN_DEV {
 			//Update Root
 			Vector3 translationalOffset = Vector3.zero;
 			float rotationalOffset = 0f;
+			// Debug.Log($"X: {TrajectoryDimOut*7 + JointDimOut*Actor.Bones.Length + 0}");
+			// Debug.Log($"Y: {TrajectoryDimOut*7 + JointDimOut*Actor.Bones.Length + 1}");
+			// Debug.Log($"Z: {TrajectoryDimOut*7 + JointDimOut*Actor.Bones.Length + 2}");
 			Vector3 rootMotion = new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0), NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 1), NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2));
 			rootMotion /= Framerate;
 			translationalOffset = rest * new Vector3(rootMotion.x, 0f, rootMotion.z);
