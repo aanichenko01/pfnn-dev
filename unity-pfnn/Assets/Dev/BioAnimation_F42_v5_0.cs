@@ -83,6 +83,7 @@ namespace PFNN_DEV {
 		}
 
 		void Update() {
+            
 			if(NN.Parameters == null) {
 				return;
 			}

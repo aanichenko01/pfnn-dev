@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace PFNN_DEV {
 	[RequireComponent(typeof(Actor))]
-	public class BioAnimation_F42_v4_0 : MonoBehaviour {
+	public class BioAnimation_F42_v5_1 : MonoBehaviour {
 
 		public bool Inspect = false;
 
@@ -219,7 +219,7 @@ namespace PFNN_DEV {
 			Vector3 translationalOffset = Vector3.zero;
 			float rotationalOffset = 0f;
 			Vector3 rootMotion = new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0), NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 1), NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2));
-			rootMotion /= Framerate;
+			// rootMotion /= Framerate;
 			translationalOffset = rest * new Vector3(rootMotion.x, 0f, rootMotion.z);
 			rotationalOffset = rest * rootMotion.y;
 
@@ -390,13 +390,13 @@ namespace PFNN_DEV {
 		}
 
 		#if UNITY_EDITOR
-		[CustomEditor(typeof(BioAnimation_F42_v4_0))]
-		public class BioAnimation_F42_v4_0_Editor : Editor {
+		[CustomEditor(typeof(BioAnimation_F42_v5_1))]
+		public class BioAnimation_F42_v5_1_Editor : Editor {
 
-			public BioAnimation_F42_v4_0 Target;
+			public BioAnimation_F42_v5_1 Target;
 
 			void Awake() {
-				Target = (BioAnimation_F42_v4_0)target;
+				Target = (BioAnimation_F42_v5_1)target;
 			}
 
 			public override void OnInspectorGUI() {

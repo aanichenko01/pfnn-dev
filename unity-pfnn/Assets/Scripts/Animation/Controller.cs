@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Analytics;
+using TMPro;
+
 
 // using System.Diagnostics;
 
@@ -21,10 +23,7 @@ public class Controller
 	public KeyCode TurnRight = KeyCode.E;
 
 	public Style[] Styles = new Style[0];
-
-	[SerializeField] private Waypoints Waypoints;
-	private Transform CurrentWaypoint;
-
+	
 	public float[] GetStyle()
 	{
 		float[] style = new float[Styles.Length];
@@ -43,35 +42,6 @@ public class Controller
 			names[i] = Styles[i].Name;
 		}
 		return names;
-	}
-
-	public bool InitializeFirstWaypoint()
-	{
-		if (Waypoints != null)
-		{
-			CurrentWaypoint = Waypoints.GetNextWaypoint(CurrentWaypoint);
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-
-	}
-
-	public Transform GetCurrentWaypoint(Vector3 currentPosition)
-	{
-		if (Vector3.Distance(currentPosition, CurrentWaypoint.position) < 0.2f)
-		{
-			CurrentWaypoint = Waypoints.GetNextWaypoint(CurrentWaypoint);
-		}
-
-		return CurrentWaypoint;
-	}
-
-	public Transform GetPreviousWaypoint()
-	{
-		return Waypoints.GetPreviousWaypoint(CurrentWaypoint);
 	}
 
 	public Vector3 QueryMove()
@@ -108,12 +78,6 @@ public class Controller
 			turn += 1f;
 		}
 		return turn;
-	}
-
-	public Vector3 QueryMoveToWaypoint(Vector3 currentPosition)
-	{
-		Vector3 move = (GetCurrentWaypoint(currentPosition).position - currentPosition).normalized;
-		return move;
 	}
 
 	public void SetStyleCount(int count)
@@ -274,10 +238,6 @@ public class Controller
 
 			if (Inspect)
 			{
-				using (new EditorGUILayout.VerticalScope("Box"))
-				{
-					Waypoints = (Waypoints)EditorGUILayout.ObjectField("Waypoints", Waypoints, typeof(Waypoints), true);
-				}
 				using (new EditorGUILayout.VerticalScope("Box"))
 				{
 					Forward = (KeyCode)EditorGUILayout.EnumPopup("Forward", Forward);
