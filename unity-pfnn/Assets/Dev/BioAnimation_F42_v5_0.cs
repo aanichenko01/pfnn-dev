@@ -28,7 +28,7 @@ namespace PFNN_DEV {
 		private Vector3 TargetVelocity;
 
 		//Rescaling for character (cm to m)
-		private float UnitScale = 10f;
+		private float UnitScale = 1f;
 
 		//State
 		private Vector3[] Positions = new Vector3[0];
@@ -155,8 +155,8 @@ namespace PFNN_DEV {
 
 				Trajectory.Points[i].SetPosition((1f-factor)*prev.GetPosition() + factor*next.GetPosition());
 				Trajectory.Points[i].SetDirection((1f-factor)*prev.GetDirection() + factor*next.GetDirection());
-				Trajectory.Points[i].SetLeftsample((1f-factor)*prev.GetLeftSample() + factor*next.GetLeftSample());
-				Trajectory.Points[i].SetRightSample((1f-factor)*prev.GetRightSample() + factor*next.GetRightSample());
+				// Trajectory.Points[i].SetLeftsample((1f-factor)*prev.GetLeftSample() + factor*next.GetLeftSample());
+				// Trajectory.Points[i].SetRightSample((1f-factor)*prev.GetRightSample() + factor*next.GetRightSample());
 				Trajectory.Points[i].SetSlope((1f-factor)*prev.GetSlope() + factor*next.GetSlope());
 			}
 
@@ -168,7 +168,7 @@ namespace PFNN_DEV {
 				Matrix4x4 currentRoot = Trajectory.Points[RootPointIndex].GetTransformation();
 				Matrix4x4 previousRoot = Trajectory.Points[RootPointIndex-1].GetTransformation();
 				
-				Debug.Log("BREAK 1");
+				// Debug.Log("BREAK 1");
 				int start = 0;
 				//Input Trajectory Positions / Directions
 				for(int i=0; i<PointSamples; i++) {
@@ -186,7 +186,7 @@ namespace PFNN_DEV {
 				}
 				start += TrajectoryDimIn*PointSamples;
 
-				Debug.Log("BREAK 2");
+				// Debug.Log("BREAK 2");
 				//Input Previous Bone Positions / Velocities
 				for(int i=0; i<Actor.Bones.Length; i++) {
 					Vector3 pos = Positions[i].GetRelativePositionTo(previousRoot);
@@ -199,33 +199,29 @@ namespace PFNN_DEV {
 					NN.SetInput(start + i*JointDimIn + 5, UnitScale * vel.z);
 				}
 
-				Debug.Log("BREAK 3");
+				// Debug.Log("BREAK 3");
 				//Predict
 				float rest = Mathf.Pow(1.0f-Trajectory.Points[RootPointIndex].Styles[0], 0.25f);
 				NN.SetDamping(1f - (rest * 0.9f + 0.1f));
 				NN.Predict();
 
-				Debug.Log("BREAK 4");
+				// Debug.Log("BREAK 4");
 				//Update Past Trajectory
 				for(int i=0; i<RootPointIndex; i++) {
 					Trajectory.Points[i].SetPosition(Trajectory.Points[i+1].GetPosition());
 					Trajectory.Points[i].SetDirection(Trajectory.Points[i+1].GetDirection());
-					Trajectory.Points[i].SetLeftsample(Trajectory.Points[i+1].GetLeftSample());
-					Trajectory.Points[i].SetRightSample(Trajectory.Points[i+1].GetRightSample());
+					// Trajectory.Points[i].SetLeftsample(Trajectory.Points[i+1].GetLeftSample());
+					// Trajectory.Points[i].SetRightSample(Trajectory.Points[i+1].GetRightSample());
 					Trajectory.Points[i].SetSlope(Trajectory.Points[i+1].GetSlope());
 					for(int j=0; j<Trajectory.Points[i].Styles.Length; j++) {
 						Trajectory.Points[i].Styles[j] = Trajectory.Points[i+1].Styles[j];
 					}
 				}
 
-				Debug.Log("BREAK 5");
 				//Update Current Trajectory
-				// THESE INDICES ARE CORRECT
-				// Debug.Log($"Root X idx: {TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0}");
-				// Debug.Log($"Root Z idx: {TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2}");
-				// Debug.Log($"Root Y idx: {TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 1}");
+				Debug.Log($"ROOT POSITION: {(rest * new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0) / UnitScale, 0f, NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2) / UnitScale)).GetRelativePositionFrom(currentRoot)}");
 				Trajectory.Points[RootPointIndex].SetPosition((rest * new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0) / UnitScale, 0f, NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2) / UnitScale)).GetRelativePositionFrom(currentRoot));
-				Trajectory.Points[RootPointIndex].SetDirection(Quaternion.AngleAxis(rest * Mathf.Rad2Deg * (-NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 1)), Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection());
+				Trajectory.Points[RootPointIndex].SetDirection(Quaternion.AngleAxis(rest * NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 1), Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection());
 				Trajectory.Points[RootPointIndex].Postprocess();
 				Matrix4x4 nextRoot = Trajectory.Points[RootPointIndex].GetTransformation();
 
@@ -234,7 +230,7 @@ namespace PFNN_DEV {
 					Trajectory.Points[i].SetPosition(Trajectory.Points[i].GetPosition() + (rest * new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0) / UnitScale, 0f, NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2) / UnitScale)).GetRelativeDirectionFrom(nextRoot));
 				}
 
-				Debug.Log("BREAK 6");
+				// Debug.Log("LOOP 6");
 				start = 0;
 				for(int i=RootPointIndex+1; i<Trajectory.Points.Length; i++) {
 					// int w = RootSampleIndex;
@@ -268,7 +264,7 @@ namespace PFNN_DEV {
 					Trajectory.Points[i].Postprocess();
 				}
 
-				Debug.Log("BREAK 7");
+			// 	// Debug.Log("BREAK 7");
 
 				for(int i=RootPointIndex+1; i<Trajectory.Points.Length; i++) {
 					//ROOT	1		2		3		4		5
@@ -279,19 +275,18 @@ namespace PFNN_DEV {
 
 					Trajectory.Points[i].SetPosition((1f-factor)*prev.GetPosition() + factor*next.GetPosition());
 					Trajectory.Points[i].SetDirection((1f-factor)*prev.GetDirection() + factor*next.GetDirection());
-					Trajectory.Points[i].SetLeftsample((1f-factor)*prev.GetLeftSample() + factor*next.GetLeftSample());
-					Trajectory.Points[i].SetRightSample((1f-factor)*prev.GetRightSample() + factor*next.GetRightSample());
+					// Trajectory.Points[i].SetLeftsample((1f-factor)*prev.GetLeftSample() + factor*next.GetLeftSample());
+					// Trajectory.Points[i].SetRightSample((1f-factor)*prev.GetRightSample() + factor*next.GetRightSample());
 					Trajectory.Points[i].SetSlope((1f-factor)*prev.GetSlope() + factor*next.GetSlope());
 				}
 
 				//Avoid Collisions
 				CollisionChecks(RootPointIndex);
 				
-				Debug.Log("BREAK 8");
 				//Compute Posture
 				// int opos = 8 + 4*RootSampleIndex + Actor.Bones.Length*3*0;
 				// int ovel = 8 + 4*RootSampleIndex + Actor.Bones.Length*3*1;
-				//int orot = 8 + 4*RootSampleIndex + Actor.Bones.Length*3*2;
+				// int orot = 8 + 4*RootSampleIndex + Actor.Bones.Length*3*2;
 				for(int i=0; i<Actor.Bones.Length; i++) {		
 					Vector3 position = new Vector3(NN.GetOutput(start + i*JointDimOut + 0), NN.GetOutput(start + i*JointDimOut + 1), NN.GetOutput(start + i*JointDimOut + 2)) / UnitScale;
 					Vector3 velocity = new Vector3(NN.GetOutput(start + i*JointDimOut + 3), NN.GetOutput(start + i*JointDimOut + 4), NN.GetOutput(start + i*JointDimOut + 5)) / UnitScale;
@@ -301,7 +296,6 @@ namespace PFNN_DEV {
 					//rotations[i] = rotation.GetRelativeRotationFrom(currentRoot);
 				}
 
-				Debug.Log("BREAK 9");
 				//Update Posture
 				transform.position = nextRoot.GetPosition();
 				transform.rotation = nextRoot.GetRotation();
