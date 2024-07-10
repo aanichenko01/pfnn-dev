@@ -250,6 +250,11 @@ public class MotionExporter : EditorWindow {
 									X.Feed(velocity.y, Data.ID.Standard, "Bone"+(k+1)+"VelocityY");
 									X.Feed(velocity.z, Data.ID.Standard, "Bone"+(k+1)+"VelocityZ");
 								}
+
+								// phase at root index
+								float phase = current.Trajectory.Points[6].GetPhase();
+								X.Feed(phase, Data.ID.Standard, "Phase");
+
 								X.Store();
 								//
 
