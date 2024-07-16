@@ -8,9 +8,10 @@ Parameters.asset.meta
 
 # Ignore All Animation/Rig Data
 Data/
-
 # Ignore Weights
 Weights/
+# Ignore Recordings
+Recordings/
 
 # Ignore all meta files as unity regenerates them
 *.meta
