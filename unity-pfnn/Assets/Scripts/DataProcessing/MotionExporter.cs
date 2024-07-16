@@ -252,8 +252,8 @@ public class MotionExporter : EditorWindow {
 								}
 
 								// phase at root index
-								float phase = current.Trajectory.Points[6].GetPhase();
-								X.Feed(phase, Data.ID.Standard, "Phase");
+								// float phase = current.Trajectory.Points[6].GetPhase();
+								// X.Feed(phase, Data.ID.Standard, "Phase");
 
 								X.Store();
 								//
