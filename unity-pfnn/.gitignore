@@ -12,6 +12,8 @@ Data/
 Weights/
 # Ignore Recordings
 Recordings/
+# Ingore Animations
+Animation/
 
 # Ignore all meta files as unity regenerates them
 *.meta
