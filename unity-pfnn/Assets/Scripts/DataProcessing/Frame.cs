@@ -123,7 +123,32 @@ public class Frame
 		
 		Vector3 currentHipPosition = GetBoneTransformation(0, mirrored, Data.RootSmoothing).GetPosition();
 		Vector3 currentGroundPosition = Utility.ProjectGround(currentHipPosition, Data.Ground);
-		return currentGroundPosition;
+
+		// bool jump = true;
+		// if (jump)
+		// {
+		// 	Vector3 hipPositionFirstFrame = GetFirstFrame().GetBoneTransformation(0, mirrored, Data.RootSmoothing).GetPosition();
+		// 	Vector3 groundPositionFirstFrame = Utility.ProjectGround(hipPositionFirstFrame, Data.Ground);
+
+		// 	float desiredDistance = Vector3.Distance(hipPositionFirstFrame, groundPositionFirstFrame);
+
+		// 	Vector3 jumpRootPostion = new Vector3(
+		// 		currentHipPosition.x,
+		// 		currentHipPosition.y - desiredDistance,
+		// 		currentHipPosition.z
+		// 	);
+
+		// 	// Check trajectory is not sinking into the ground
+		// 	if(jumpRootPostion.y < currentGroundPosition.y){
+		// 		jumpRootPostion.y  = currentGroundPosition.y;
+		// 	}
+
+		// 	return jumpRootPostion;
+		// }
+		// else
+		// {
+			return currentGroundPosition;
+		// }
 	}
 
 	public Quaternion GetRootRotation(bool mirrored)
