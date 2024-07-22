@@ -37,9 +37,9 @@ public class JumpGenerator : MonoBehaviour
         int previousTime = -1;
 
         // Loop over combinations of height and distance to generate augmented animations
-        for (float distance = 0f; distance <= 1.1f; distance += Increment)
+        for (float distance = 0f; distance <= 1.01f; distance += Increment)
         {
-            for (float height = 0f; height <= 1.1f; height += Increment)
+            for (float height = 0f; height <= 1.01f; height += Increment)
             {
 
                 Animator.SetFloat("Distance", distance);

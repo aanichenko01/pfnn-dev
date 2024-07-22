@@ -181,6 +181,7 @@ public class MotionExporter : EditorWindow {
 						if(m==2) {
 							Editor.SetMirror(true);
 						}
+
 						for(int s=0; s<Editor.GetCurrentFile().Data.Sequences.Length; s++) {
 							List<State> states = new List<State>();
 							float start = Editor.GetCurrentFile().Data.GetFrame(Editor.GetCurrentFile().Data.Sequences[s].Start).Timestamp;

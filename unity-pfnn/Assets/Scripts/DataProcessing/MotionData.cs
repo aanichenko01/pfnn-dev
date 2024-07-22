@@ -23,6 +23,12 @@ public class MotionData : ScriptableObject {
 	public bool Export = false;
 	public Sequence[] Sequences = new Sequence[0];
 
+	// NEW STUFF
+	public bool AddJumpTarget = false;
+	// public Transform TargetFoot;
+
+	public GameObject JumpTarget = null;
+
 	public float GetTotalTime() {
 		return GetTotalFrames() / Framerate;
 	}
@@ -191,6 +197,33 @@ public class MotionData : ScriptableObject {
 		if(Symmetry[source] != target) {
 			Symmetry[source] = target;
 		}
+	}
+
+	public void SpawnJumpTarget(Vector3 footContact) {
+		// TODO PLACE ROOT IN MIDDLE
+		Vector3 cubeSize = new Vector3(0.5f, 0.5f, 0.15f);
+		Vector3 offset = new Vector3(0, 0, 0.09f);
+		// Create a new cube
+        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		//Create the cube on "Ground" layer index 9
+		cube.layer = 9;
+		cube.transform.localScale = cubeSize;
+
+        // Adjust the position to align the top of the cube with the top position
+        cube.transform.position = footContact + offset - new Vector3(0, cubeSize.y / 2, cubeSize.z/2);
+
+		JumpTarget = cube;
+
+        // Set the cube's color to yellow
+        // yellowCube.GetComponent<Renderer>().material.color = Color.yellow;
+	}
+
+	public void DestroyJumpTarget() {
+		if (JumpTarget != null)
+        {
+            DestroyImmediate(JumpTarget);
+            JumpTarget = null;
+        }
 	}
 
 	[System.Serializable]
