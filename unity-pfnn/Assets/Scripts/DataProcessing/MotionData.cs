@@ -198,22 +198,61 @@ public class MotionData : ScriptableObject {
 		}
 	}
 
-	public void SpawnJumpTarget(Vector3 footContact) {
-		Vector3 cubeSize = new Vector3(0.5f, 0.5f, 0.3f);
+	public void SpawnJumpTarget(int footContactRefIdx) {
 
-		// Create a new cube
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-		//Create the cube on "Ground" layer index 9
-		cube.layer = 9;
-		cube.transform.localScale = cubeSize;
+		int totalFrames = GetTotalFrames()-1;
+		Frame[] currentFrames = GetFrames(1, totalFrames);
+	
+		Vector3 footContactFirstFrame = currentFrames[0].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+		Vector3 footContactLastFrame = currentFrames[^1].GetBoneTransformation(footContactRefIdx, false).GetPosition();
 
-        // Adjust the position to align the top of the cube with the top position
-        cube.transform.position = footContact - new Vector3(0, cubeSize.y / 2, 0);
+		// Jump Up
+		if((footContactLastFrame.y - footContactFirstFrame.y) > 0.01f) {
+			Debug.Log("Jump Up");
+			Vector3 cubeSize = new Vector3(0.5f, 0.5f, 0.3f);
+			GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			//Create the cube on "Ground" layer index 9
+			cube.layer = 9;
+			cube.transform.localScale = cubeSize;
+			// Adjust position to align the top of the cube with footContact
+			cube.transform.position = footContactLastFrame - new Vector3(0, cubeSize.y / 2, 0);
+			JumpTarget = cube;
+		} else {  //Jump Flat
+			Debug.Log("Jump Flat");
+			float highestFootPosition = footContactFirstFrame.y;
+			int highestFootPositionFrameIdx = 0;
+			for (int i = 0; i < totalFrames; i++) {
+				float currentYPostion = currentFrames[i].GetBoneTransformation(footContactRefIdx, false).GetPosition().y;
+				if (currentYPostion > highestFootPosition) {
+					highestFootPosition = currentYPostion;
+					highestFootPositionFrameIdx = i;
+				}
+			}
+			
+			// Scale the sphere based on distance travelled (smaller jump = smaller sphere)
+			float zDiff = footContactLastFrame.z - footContactFirstFrame.z;
+			Vector3 sphereSize = new Vector3(zDiff, zDiff, zDiff);
+			GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			//Create the sphere on "Ground" layer index 9
+			sphere.layer = 9;
+			sphere.transform.localScale = sphereSize;
 
-		JumpTarget = cube;
+			// Adjust sphere position based on highest point reached in jump + jump distance
+			Vector3 highestFootRefPostion = currentFrames[highestFootPositionFrameIdx].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+			sphere.transform.position = highestFootRefPostion - new Vector3(0, highestFootRefPostion.y + zDiff/2.5f, zDiff/3f);
 
-        // Set the cube's color to yellow
-        // yellowCube.GetComponent<Renderer>().material.color = Color.yellow;
+			JumpTarget = sphere;
+		}
+
+		// TODO JUMP DOWN
+
+		// Set color to yellow
+		Renderer renderer = JumpTarget.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+			// Use shared material to avoid memory leaks
+            renderer.sharedMaterial.color = Color.yellow;;
+        }
 	}
 
 	public void DestroyJumpTarget() {

@@ -33,6 +33,14 @@ public class MotionExporter : EditorWindow {
 	private static string Separator = " ";
 	private static string Accuracy = "F5";
 
+	// Variables for Quick Export 
+	public bool AutoJumpTarget = false;
+	public bool AutoTrajectory = false;
+	public bool AutoStyle = false;
+	public string AutoStyleName = "Style 1";
+
+	public bool ExportAll = false;
+
 	[MenuItem ("Data Processing/Motion Exporter")]
 	static void Init() {
 		Window = EditorWindow.GetWindow(typeof(MotionExporter));
@@ -82,30 +90,34 @@ public class MotionExporter : EditorWindow {
 					WriteLabels = EditorGUILayout.Toggle("Write Labels", WriteLabels);
 					WriteNorm = EditorGUILayout.Toggle("Write Norm", WriteNorm);
 
+					AutoJumpTarget = EditorGUILayout.Toggle("Generate Jump Targets", AutoJumpTarget);
+
+					ExportAll = EditorGUILayout.Toggle("Export All", ExportAll);
+
 					if(!Exporting) {
 						if(Utility.GUIButton("Export Data", UltiDraw.DarkGrey, UltiDraw.White)) {
 							Debug.Log("Starting to EXPORT DATA");
 							this.StartCoroutine(ExportData());
 						}
 
-						if(Utility.GUIButton("Test", UltiDraw.DarkGrey, UltiDraw.White)) {
-							Debug.Log(Mathf.Repeat(-0.1f, 1f));
-							//float[] angles = new float[6]{0f, 0.4f, 0.6f, 1.0f, 1.2f, 1.4f};
-							//Debug.Log(Utility.FilterGaussian(angles, true));
-						}
+						// if(Utility.GUIButton("Test", UltiDraw.DarkGrey, UltiDraw.White)) {
+						// 	Debug.Log(Mathf.Repeat(-0.1f, 1f));
+						// 	//float[] angles = new float[6]{0f, 0.4f, 0.6f, 1.0f, 1.2f, 1.4f};
+						// 	//Debug.Log(Utility.FilterGaussian(angles, true));
+						// }
 
-						EditorGUILayout.BeginHorizontal();
-						if(Utility.GUIButton("Enable All", UltiDraw.DarkGrey, UltiDraw.White)) {
-							for(int i=0; i<Export.Length; i++) {
-								Export[i] = true;
-							}
-						}
-						if(Utility.GUIButton("Disable All", UltiDraw.DarkGrey, UltiDraw.White)) {
-							for(int i=0; i<Export.Length; i++) {
-								Export[i] = false;
-							}
-						}
-						EditorGUILayout.EndHorizontal();
+						// EditorGUILayout.BeginHorizontal();
+						// if(Utility.GUIButton("Enable All", UltiDraw.DarkGrey, UltiDraw.White)) {
+						// 	for(int i=0; i<Export.Length; i++) {
+						// 		Export[i] = true;
+						// 	}
+						// }
+						// if(Utility.GUIButton("Disable All", UltiDraw.DarkGrey, UltiDraw.White)) {
+						// 	for(int i=0; i<Export.Length; i++) {
+						// 		Export[i] = false;
+						// 	}
+						// }
+						// EditorGUILayout.EndHorizontal();
 					} else {
 						EditorGUILayout.LabelField("Generating");
 						EditorGUI.DrawRect(new Rect(EditorGUILayout.GetControlRect().x, EditorGUILayout.GetControlRect().y, Generating * EditorGUILayout.GetControlRect().width, 25f), UltiDraw.Green.Transparent(0.75f));
@@ -166,20 +178,32 @@ public class MotionExporter : EditorWindow {
 
 			int items = 0;
 
-			Data X = new Data(WriteData ? CreateFile("Input") : null, WriteNorm ? CreateFile("InputNorm") : null, WriteLabels ? CreateFile("InputLabels") : null);
-			Data Y = new Data(WriteData ? CreateFile("Output") : null, WriteNorm ? CreateFile("OutputNorm") : null, WriteLabels ? CreateFile("OutputLabels") : null);
-
 			for(int i=0; i<Editor.Files.Length; i++) {
-				// Check if actually trying to export
-				// Debug.Log(Editor.Files[i].Data.Export);
-				if(Editor.Files[i].Data.Export) {
+				if(Editor.Files[i].Data.Export || ExportAll) {
 					Editor.LoadFile(Editor.Files[i]);
+					
+					// Only write labels once as they will be repeated
+					if(i > 0) {
+						WriteLabels = false;
+					}
+
+					Data X = new Data(WriteData ? CreateFile($"Input_{i}") : null, WriteNorm ? CreateFile($"InputNorm_{i}") : null, WriteLabels ? CreateFile($"InputLabels") : null);
+					Data Y = new Data(WriteData ? CreateFile($"Output_{i}") : null, WriteNorm ? CreateFile($"OutputNorm_{i}") : null, WriteLabels ? CreateFile($"OutputLabels") : null);
+					
 					for(int m=1; m<=(Mirror ? 2 : 1); m++) {
 						if(m==1) {
 							Editor.SetMirror(false);
 						}
 						if(m==2) {
 							Editor.SetMirror(true);
+						}
+
+						// Spawn Jump Target if toggled
+						if (AutoJumpTarget && Editor.GetCurrentFile().Data.JumpTarget == null)
+						{
+							Debug.Log("Spawning Jump Object");
+							int footContactRefIdx = Editor.GetCurrentFile().Data.Source.FindBone(Editor.GetFootContactRefernce().name).Index;
+							Editor.GetCurrentFile().Data.SpawnJumpTarget(footContactRefIdx);
 						}
 
 						for(int s=0; s<Editor.GetCurrentFile().Data.Sequences.Length; s++) {
@@ -310,11 +334,18 @@ public class MotionExporter : EditorWindow {
 
 						}
 					}
+
+					X.Finish();
+					Y.Finish();
+					
+					// Destory Jump Target after processing motion
+					if (Editor.GetCurrentFile().Data.JumpTarget != null)
+					{
+						Debug.Log("Destroying Jump Object");
+						Editor.GetCurrentFile().Data.DestroyJumpTarget();
+					}
 				}
 			}
-
-			X.Finish();
-			Y.Finish();
 
 			Exporting = false;
 			yield return new WaitForSeconds(0f);

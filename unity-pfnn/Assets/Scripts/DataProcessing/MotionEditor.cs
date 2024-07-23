@@ -18,6 +18,8 @@ public class MotionEditor : MonoBehaviour
 	public bool Mirror = false;
 	public bool InspectSettings = false;
 
+	public bool InsepectAutomaticLabelling = false;
+
 	private bool AutoFocus = false;
 	private float FocusHeight = 1f;
 	private float FocusOffset = 0f;
@@ -36,6 +38,14 @@ public class MotionEditor : MonoBehaviour
 
 	private Transform FootContactReference = null;
 
+	private string AutoStyleName = "Style 2";
+
+	public string[] Styles = new string[0];
+
+	public Transform GetFootContactRefernce()
+	{
+		return FootContactReference;
+	}
 	public float GetWindow()
 	{
 		return GetCurrentFile() == null ? 0f : Window * GetCurrentFile().Data.GetTotalTime();
@@ -698,7 +708,6 @@ public class MotionEditor : MonoBehaviour
 					}
 					EditorGUILayout.EndHorizontal();
 
-
 					Utility.SetGUIColor(Target.GetActor() == null ? UltiDraw.DarkRed : UltiDraw.White);
 					Target.Actor = (Actor)EditorGUILayout.ObjectField("Actor", Target.GetActor(), typeof(Actor), true);
 					Utility.ResetGUIColor();
@@ -833,6 +842,85 @@ public class MotionEditor : MonoBehaviour
 					{
 						Target.GetCurrentFile().Data.AddModule((Module.TYPE)(module - 1));
 					}
+
+					if (Utility.GUIButton("Automatic Labelling", Target.InsepectAutomaticLabelling ? UltiDraw.Cyan : UltiDraw.LightGrey, UltiDraw.Black))
+					{
+						Target.InsepectAutomaticLabelling = !Target.InsepectAutomaticLabelling;
+					}
+
+					// Automatic Labelling Options to simplify manual annotation of large amounts of data
+					if (Target.InsepectAutomaticLabelling)
+					{
+						Utility.SetGUIColor(UltiDraw.LightGrey);
+						using (new EditorGUILayout.VerticalScope("Box"))
+						{
+
+							if (Utility.GUIButton("Label Trajectories", UltiDraw.DarkGrey, UltiDraw.White))
+							{
+								for (int i = 0; i < Instances.Length; i++)
+								{
+									File currentFile = Instances[i];
+									if ((TrajectoryModule)currentFile.Data.GetModule(Module.TYPE.Trajectory) == null)
+									{
+										currentFile.Data.AddModule(Module.TYPE.Trajectory);
+									}
+									else
+									{
+										Debug.Log($"{Names[i]} already has Trajectory assigned");
+									}
+								}
+							}
+
+							// Automatic Style Labelling
+							for (int i = 0; i < Target.Styles.Length; i++)
+							{
+								Target.Styles[i] = EditorGUILayout.TextField("Style " + (i + 1), Target.Styles[i]);
+							}
+							EditorGUILayout.BeginHorizontal();
+							if (Utility.GUIButton("Add Style", UltiDraw.DarkGrey, UltiDraw.White))
+							{
+								ArrayExtensions.Expand(ref Target.Styles);
+							}
+							if (Utility.GUIButton("Remove Style", UltiDraw.DarkGrey, UltiDraw.White))
+							{
+								ArrayExtensions.Shrink(ref Target.Styles);
+							}
+							EditorGUILayout.EndHorizontal();
+							EditorGUILayout.BeginHorizontal();
+							Target.AutoStyleName = EditorGUILayout.TextField("Motion Style Label", Target.AutoStyleName);
+							if (Utility.GUIButton("Label Styles", UltiDraw.DarkGrey, UltiDraw.White))
+							{
+								for (int i = 0; i < Instances.Length; i++)
+								{
+									File currentFile = Instances[i];
+									if ((StyleModule)currentFile.Data.GetModule(Module.TYPE.Style) == null)
+									{
+										currentFile.Data.AddModule(Module.TYPE.Style);
+										StyleModule styleModule = (StyleModule)currentFile.Data.GetModule(Module.TYPE.Style);
+										for (int j=0; j< Target.Styles.Length; j++)
+										{
+											string style = Target.Styles[j];
+											styleModule.AddStyle(style);
+											if (style == Target.AutoStyleName)
+											{
+												Frame firstFrame = currentFile.Data.GetFirstFrame();
+												styleModule.Functions[j].Toggle(firstFrame);
+												Frame lastFrame = currentFile.Data.GetLastFrame();
+												styleModule.Functions[j].Toggle(lastFrame);
+											}
+										}
+
+									}
+									else
+									{
+										Debug.Log($"{Names[i]} already has Style Module assigned");
+									}
+								}
+							}
+							EditorGUILayout.EndHorizontal();
+						}
+					}
+
 					if (Utility.GUIButton("Settings", Target.InspectSettings ? UltiDraw.Cyan : UltiDraw.LightGrey, UltiDraw.Black))
 					{
 						Target.InspectSettings = !Target.InspectSettings;
@@ -843,27 +931,19 @@ public class MotionEditor : MonoBehaviour
 						using (new EditorGUILayout.VerticalScope("Box"))
 						{
 							Utility.ResetGUIColor();
-							Target.GetCurrentFile().Data.Export = EditorGUILayout.Toggle("Export", Target.GetCurrentFile().Data.Export);
-
-							// Jump Target Logic
-							Target.GetCurrentFile().Data.AddJumpTarget = EditorGUILayout.Toggle("Add Jump Target", Target.GetCurrentFile().Data.AddJumpTarget);
+							// Spawn Jump Target if toggled
+							Target.GetCurrentFile().Data.AddJumpTarget = EditorGUILayout.Toggle("Generate Jump Target", Target.GetCurrentFile().Data.AddJumpTarget);
 							if (Target.GetCurrentFile().Data.AddJumpTarget && Target.GetCurrentFile().Data.JumpTarget == null)
 							{
 								int footContactRefIdx = Target.GetCurrentFile().Data.Source.FindBone(Target.FootContactReference.name).Index;
-								
-								Vector3 footContactFirstFrame = Target.GetCurrentFile().Data.GetFirstFrame().GetBoneTransformation(footContactRefIdx, false).GetPosition();
-								Vector3 footContactLastFrame = Target.GetCurrentFile().Data.GetLastFrame().GetBoneTransformation(footContactRefIdx, false).GetPosition();
-								// Only spawn object if y is within certain range (manually determined)
-								if (footContactLastFrame.y < -0.005f || footContactLastFrame.y > 0.005f)
-								{
-									Target.GetCurrentFile().Data.SpawnJumpTarget(footContactLastFrame);
-								}
+								Target.GetCurrentFile().Data.SpawnJumpTarget(footContactRefIdx);
 							}
+							// Destory Jump Target not toggled
 							if (!Target.GetCurrentFile().Data.AddJumpTarget && Target.GetCurrentFile().Data.JumpTarget != null)
 							{
 								Target.GetCurrentFile().Data.DestroyJumpTarget();
 							}
-							/////////////////////////////////////////////////////////////////////////////
+							Target.GetCurrentFile().Data.Export = EditorGUILayout.Toggle("Export", Target.GetCurrentFile().Data.Export);
 
 							Target.SetScaling(EditorGUILayout.FloatField("Scaling", Target.GetCurrentFile().Data.Scaling));
 							Target.GetCurrentFile().Data.RootSmoothing = EditorGUILayout.IntField("Root Smoothing", Target.GetCurrentFile().Data.RootSmoothing);
