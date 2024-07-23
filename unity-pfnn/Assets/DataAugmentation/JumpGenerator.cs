@@ -14,6 +14,8 @@ public class JumpGenerator : MonoBehaviour
     [SerializeField] string SaveFolder = "Assets/";
     [SerializeField] float Framerate = 30;
 
+    [SerializeField] string FileName = null; 
+
     private AnimationClip Clip;
     private AnimationClip CurrentClip;
     private string CurrentClipName;
@@ -80,7 +82,7 @@ public class JumpGenerator : MonoBehaviour
         Clip = new AnimationClip
         {
             frameRate = Framerate,
-            name = $"{gameObject.name}_animation_{index}"
+            name = $"{FileName}_{index}"
         };
         CurrentClipName = Clip.name;
         CurrentClip = Clip;

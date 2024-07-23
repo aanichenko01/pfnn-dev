@@ -845,12 +845,15 @@ public class MotionEditor : MonoBehaviour
 							Utility.ResetGUIColor();
 							Target.GetCurrentFile().Data.Export = EditorGUILayout.Toggle("Export", Target.GetCurrentFile().Data.Export);
 
+							// Jump Target Logic
 							Target.GetCurrentFile().Data.AddJumpTarget = EditorGUILayout.Toggle("Add Jump Target", Target.GetCurrentFile().Data.AddJumpTarget);
 							if (Target.GetCurrentFile().Data.AddJumpTarget && Target.GetCurrentFile().Data.JumpTarget == null)
 							{
 								int footContactRefIdx = Target.GetCurrentFile().Data.Source.FindBone(Target.FootContactReference.name).Index;
+								
+								Vector3 footContactFirstFrame = Target.GetCurrentFile().Data.GetFirstFrame().GetBoneTransformation(footContactRefIdx, false).GetPosition();
 								Vector3 footContactLastFrame = Target.GetCurrentFile().Data.GetLastFrame().GetBoneTransformation(footContactRefIdx, false).GetPosition();
-								// Only spawn object if y is within certain range (manually tuned)
+								// Only spawn object if y is within certain range (manually determined)
 								if (footContactLastFrame.y < -0.005f || footContactLastFrame.y > 0.005f)
 								{
 									Target.GetCurrentFile().Data.SpawnJumpTarget(footContactLastFrame);
@@ -860,6 +863,7 @@ public class MotionEditor : MonoBehaviour
 							{
 								Target.GetCurrentFile().Data.DestroyJumpTarget();
 							}
+							/////////////////////////////////////////////////////////////////////////////
 
 							Target.SetScaling(EditorGUILayout.FloatField("Scaling", Target.GetCurrentFile().Data.Scaling));
 							Target.GetCurrentFile().Data.RootSmoothing = EditorGUILayout.IntField("Root Smoothing", Target.GetCurrentFile().Data.RootSmoothing);
