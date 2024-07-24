@@ -55,6 +55,8 @@ public class JumpGenerator : MonoBehaviour
                 yield return new WaitUntil(() => isAnimationDone());
                 StopRecording();
                 previousTime = currentTime;
+                Debug.Log($"Recorded for Distance: {distance}");
+                Debug.Log($"Recorded for Height: {height}");
 
                 total += 1;
             }
