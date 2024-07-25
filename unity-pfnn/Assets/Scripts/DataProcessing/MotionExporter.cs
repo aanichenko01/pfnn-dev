@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.SceneManagement;
 using DeepLearning;
+using System.Diagnostics.Tracing;
 
 public class MotionExporter : EditorWindow {
 
@@ -16,7 +17,7 @@ public class MotionExporter : EditorWindow {
 	public int Framerate = 60;
 	public int BatchSize = 60;
 
-	public bool Mirror = true;
+	public bool Mirror = false;
 	public string[] Styles = new string[0];
 
 	public MotionEditor Editor = null;
@@ -29,6 +30,8 @@ public class MotionExporter : EditorWindow {
 	public bool WriteData = true;
 	public bool WriteNorm = true;
 	public bool WriteLabels = true;
+
+	public string SaveFolder = "";
 
 	private static string Separator = " ";
 	private static string Accuracy = "F5";
@@ -85,6 +88,8 @@ public class MotionExporter : EditorWindow {
 						Utility.ResetGUIColor();
 						EditorGUILayout.LabelField("Exporter");
 					}
+
+					SaveFolder = EditorGUILayout.TextField("Save Folder", SaveFolder);
 
 					WriteData = EditorGUILayout.Toggle("Write Data", WriteData);
 					WriteLabels = EditorGUILayout.Toggle("Write Labels", WriteLabels);
@@ -154,7 +159,7 @@ public class MotionExporter : EditorWindow {
 
 	private StreamWriter CreateFile(string name) {
 		string filename = string.Empty;
-		string folder = Application.dataPath + "/../../Export/";
+		string folder = SaveFolder;
 		if(!File.Exists(folder+name+".txt")) {
 			filename = folder+name;
 		} else {

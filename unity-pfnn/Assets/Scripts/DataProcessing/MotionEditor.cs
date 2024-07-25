@@ -221,7 +221,6 @@ public class MotionEditor : MonoBehaviour
 	public void LoadFrame(float timestamp)
 	{
 		Timestamp = timestamp;
-
 		if (Mirror)
 		{
 			GetEnvironment().localScale = Vector3.one.GetMirror(GetCurrentFile().Data.GetAxis(GetCurrentFile().Data.MirrorAxis));
@@ -897,7 +896,7 @@ public class MotionEditor : MonoBehaviour
 									{
 										currentFile.Data.AddModule(Module.TYPE.Style);
 										StyleModule styleModule = (StyleModule)currentFile.Data.GetModule(Module.TYPE.Style);
-										for (int j=0; j< Target.Styles.Length; j++)
+										for (int j = 0; j < Target.Styles.Length; j++)
 										{
 											string style = Target.Styles[j];
 											styleModule.AddStyle(style);
@@ -931,6 +930,8 @@ public class MotionEditor : MonoBehaviour
 						using (new EditorGUILayout.VerticalScope("Box"))
 						{
 							Utility.ResetGUIColor();
+							Target.GetCurrentFile().Data.Export = EditorGUILayout.Toggle("Export", Target.GetCurrentFile().Data.Export);
+							
 							// Spawn Jump Target if toggled
 							Target.GetCurrentFile().Data.AddJumpTarget = EditorGUILayout.Toggle("Generate Jump Target", Target.GetCurrentFile().Data.AddJumpTarget);
 							if (Target.GetCurrentFile().Data.AddJumpTarget && Target.GetCurrentFile().Data.JumpTarget == null)
@@ -943,7 +944,6 @@ public class MotionEditor : MonoBehaviour
 							{
 								Target.GetCurrentFile().Data.DestroyJumpTarget();
 							}
-							Target.GetCurrentFile().Data.Export = EditorGUILayout.Toggle("Export", Target.GetCurrentFile().Data.Export);
 
 							Target.SetScaling(EditorGUILayout.FloatField("Scaling", Target.GetCurrentFile().Data.Scaling));
 							Target.GetCurrentFile().Data.RootSmoothing = EditorGUILayout.IntField("Root Smoothing", Target.GetCurrentFile().Data.RootSmoothing);

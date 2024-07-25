@@ -15,6 +15,7 @@ public class MotionData : ScriptableObject {
 
 	public float Framerate = 1f;
 	public float Scaling = 1f;
+
 	public int RootSmoothing = 0;
 	public AXIS ForwardAxis = AXIS.ZPositive;
 	public AXIS MirrorAxis = AXIS.XPositive;
