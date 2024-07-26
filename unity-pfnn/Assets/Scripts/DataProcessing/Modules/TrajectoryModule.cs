@@ -78,13 +78,13 @@ public class TrajectoryModule : Module {
 				trajectory.Points[6+i].SetSpeed(reference.GetSpeed(mirrored));
 				trajectory.Points[6+i].Styles = styleModule == null ? new float[0] : styleModule.GetStyle(reference);
 				trajectory.Points[6+i].Phase = phaseModule == null ? 0f : Mathf.Repeat(phaseModule.GetPhase(Data.GetLastFrame(), mirrored) + Utility.PhaseUpdate(phaseModule.GetPhase(reference, mirrored), phaseModule.GetPhase(Data.GetLastFrame(), mirrored)), 1f);
-				// Frame reference = Data.GetLastFrame();
-				// trajectory.Points[6+i].SetPosition(reference.GetRootPosition(mirrored));
-				// trajectory.Points[6+i].SetRotation(reference.GetRootRotation(mirrored));
-				// trajectory.Points[6+i].SetVelocity(reference.GetRootVelocity(mirrored));
-				// trajectory.Points[6+i].SetSpeed(reference.GetSpeed(mirrored));
-				// trajectory.Points[6+i].Styles = styleModule == null ? new float[0] : styleModule.GetStyle(reference);
-				// trajectory.Points[6+i].Phase = phaseModule == null ? 0f : Mathf.Repeat(phaseModule.GetPhase(Data.GetLastFrame(), mirrored) + Utility.PhaseUpdate(phaseModule.GetPhase(reference, mirrored), phaseModule.GetPhase(Data.GetLastFrame(), mirrored)), 1f);
+				// 	Frame reference = Data.GetLastFrame();
+				// 	trajectory.Points[6+i].SetPosition(reference.GetRootPosition(mirrored));
+				// 	trajectory.Points[6+i].SetRotation(reference.GetRootRotation(mirrored));
+				// 	trajectory.Points[6+i].SetVelocity(reference.GetRootVelocity(mirrored));
+				// 	trajectory.Points[6+i].SetSpeed(reference.GetSpeed(mirrored));
+				// 	trajectory.Points[6+i].Styles = styleModule == null ? new float[0] : styleModule.GetStyle(reference);
+				// 	trajectory.Points[6+i].Phase = phaseModule == null ? 0f : Mathf.Repeat(phaseModule.GetPhase(Data.GetLastFrame(), mirrored) + Utility.PhaseUpdate(phaseModule.GetPhase(reference, mirrored), phaseModule.GetPhase(Data.GetLastFrame(), mirrored)), 1f);
 			} else {
 				Frame future = Data.GetFrame(Mathf.Clamp(frame.Timestamp + delta, 0f, Data.GetTotalTime()));
 				trajectory.Points[6+i].SetTransformation(future.GetRootTransformation(mirrored));

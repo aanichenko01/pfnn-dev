@@ -15,7 +15,7 @@ namespace PFNN_DEV {
 
 		public Controller Controller;
 
-		public int TrajectoryDimIn = 8;
+		public int TrajectoryDimIn = 9;
 		public int TrajectoryDimOut = 4;
 		public int JointDimIn = 6;
 		public int JointDimOut = 6;
@@ -220,7 +220,7 @@ namespace PFNN_DEV {
 				}
 
 				//Update Current Trajectory
-				Debug.Log($"ROOT POSITION: {(rest * new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0) / UnitScale, 0f, NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2) / UnitScale)).GetRelativePositionFrom(currentRoot)}");
+				// Debug.Log($"ROOT POSITION: {(rest * new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0) / UnitScale, 0f, NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2) / UnitScale)).GetRelativePositionFrom(currentRoot)}");
 				Trajectory.Points[RootPointIndex].SetPosition((rest * new Vector3(NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 0) / UnitScale, 0f, NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 2) / UnitScale)).GetRelativePositionFrom(currentRoot));
 				Trajectory.Points[RootPointIndex].SetDirection(Quaternion.AngleAxis(rest * NN.GetOutput(TrajectoryDimOut*6 + JointDimOut*Actor.Bones.Length + 1), Vector3.up) * Trajectory.Points[RootPointIndex].GetDirection());
 				Trajectory.Points[RootPointIndex].Postprocess();

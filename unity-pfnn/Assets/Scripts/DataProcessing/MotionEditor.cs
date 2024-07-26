@@ -38,7 +38,11 @@ public class MotionEditor : MonoBehaviour
 
 	private Transform FootContactReference = null;
 
-	private string AutoStyleName = "Style 2";
+	private bool IsJump;
+
+	private string IdleLabel = "Style 1";
+
+	private string AutoStyleName = "Style";
 
 	public string[] Styles = new string[0];
 
@@ -886,6 +890,13 @@ public class MotionEditor : MonoBehaviour
 							}
 							EditorGUILayout.EndHorizontal();
 							EditorGUILayout.BeginHorizontal();
+							Target.IsJump = EditorGUILayout.Toggle("isJump", Target.IsJump);
+							if (Target.IsJump)
+							{
+								Target.IdleLabel = EditorGUILayout.TextField("For Jump Auto Labelling Provide Idle Label", Target.IdleLabel);
+							}
+							EditorGUILayout.EndHorizontal();
+							EditorGUILayout.BeginHorizontal();
 							Target.AutoStyleName = EditorGUILayout.TextField("Motion Style Label", Target.AutoStyleName);
 							if (Utility.GUIButton("Label Styles", UltiDraw.DarkGrey, UltiDraw.White))
 							{
@@ -907,6 +918,74 @@ public class MotionEditor : MonoBehaviour
 												Frame lastFrame = currentFile.Data.GetLastFrame();
 												styleModule.Functions[j].Toggle(lastFrame);
 											}
+										}
+
+										// Additional labelling for jumping motion
+										if (Target.IsJump)
+										{
+											// Defaults values
+											int idleIndex = 0;
+											int jumpIndex = 2;
+											// Check to ensure correct indices are used
+											for (int j = 0; j < Target.Styles.Length; j++)
+											{
+												string style = Target.Styles[j];
+												if (style == Target.AutoStyleName)
+												{
+													jumpIndex= j;
+												}
+												if (style == Target.IdleLabel)
+												{
+													idleIndex= j;
+												}
+
+											}
+
+											// If jumping first and last frames are idle
+											Frame firstFrame = currentFile.Data.GetFirstFrame();
+											Frame lastFrame = currentFile.Data.GetLastFrame();
+											// Toggle Idle
+											styleModule.Functions[idleIndex].Toggle(firstFrame);
+											styleModule.Functions[idleIndex].Toggle(lastFrame);
+											// UnToggle Jump
+											styleModule.Functions[jumpIndex].Toggle(firstFrame);
+											styleModule.Functions[jumpIndex].Toggle(lastFrame);
+
+											// Toggle betwen Idle and Jump based on how much footcontact changes (has been manually tuned)
+											int totalFrames = currentFile.Data.GetTotalFrames() - 1;
+											int footContactRefIdx = Target.GetCurrentFile().Data.Source.FindBone(Target.FootContactReference.name).Index;
+											Frame[] currentFrames = currentFile.Data.GetFrames(1, totalFrames);
+											Vector3 footPostitionFirstFrame = currentFrames[0].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+											int count = 1;
+
+											// IDLE TO JUMP
+											Vector3 nextFootPostion = currentFrames[count].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+											while (Mathf.Abs(nextFootPostion.y - footPostitionFirstFrame.y) <= 0.01f)
+											{
+												nextFootPostion = currentFrames[count + 1].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+												count += 1;
+											}
+											Frame transitionFrame = currentFrames[count];
+											styleModule.ToggleKey(transitionFrame);
+											styleModule.Functions[idleIndex].Toggle(transitionFrame);
+											styleModule.Functions[jumpIndex].Toggle(transitionFrame);
+
+											// JUMP TO IDLE
+											Vector3 footPostitionLastFrame = currentFrames[^1].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+											count = 1;
+											Vector3 previousFootPostion = currentFrames[^count].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+											while (Mathf.Abs(previousFootPostion.y - footPostitionLastFrame.y) <= 0.01f) {
+												previousFootPostion = currentFrames[^(count + 1)].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+												count += 1;
+											}
+
+											transitionFrame = currentFrames[^count];
+											styleModule.ToggleKey(transitionFrame);
+											styleModule.Functions[jumpIndex].Toggle(transitionFrame);
+											// Idle needs to be toggled twice to reset to 0
+											styleModule.Functions[idleIndex].Toggle(transitionFrame);
+											styleModule.Functions[idleIndex].Toggle(transitionFrame);
+
 										}
 
 									}
@@ -931,7 +1010,7 @@ public class MotionEditor : MonoBehaviour
 						{
 							Utility.ResetGUIColor();
 							Target.GetCurrentFile().Data.Export = EditorGUILayout.Toggle("Export", Target.GetCurrentFile().Data.Export);
-							
+
 							// Spawn Jump Target if toggled
 							Target.GetCurrentFile().Data.AddJumpTarget = EditorGUILayout.Toggle("Generate Jump Target", Target.GetCurrentFile().Data.AddJumpTarget);
 							if (Target.GetCurrentFile().Data.AddJumpTarget && Target.GetCurrentFile().Data.JumpTarget == null)
