@@ -5,9 +5,10 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-public class MotionData : ScriptableObject {
+public class MotionData : ScriptableObject
+{
 
-	public enum AXIS {XPositive, YPositive, ZPositive, XNegative, YNegative, ZNegative};
+	public enum AXIS { XPositive, YPositive, ZPositive, XNegative, YNegative, ZNegative };
 
 	public Hierarchy Source = null;
 	public Frame[] Frames = new Frame[0];
@@ -29,187 +30,254 @@ public class MotionData : ScriptableObject {
 
 	public GameObject JumpTarget = null;
 
-	public float GetTotalTime() {
+	public float GetTotalTime()
+	{
 		return GetTotalFrames() / Framerate;
 	}
 
-	public int GetTotalFrames() {
+	public int GetTotalFrames()
+	{
 		return Frames.Length;
 	}
 
-	public Frame GetFirstFrame() {
+	public Frame GetFirstFrame()
+	{
 		return Frames[0];
 	}
 
-	public Frame GetLastFrame() {
-		return Frames[Frames.Length-1];
+	public Frame GetLastFrame()
+	{
+		return Frames[Frames.Length - 1];
 	}
 
-	public Frame GetFrame(int index) {
-		if(index < 1 || index > GetTotalFrames()) {
+	public Frame GetFrame(int index)
+	{
+		if (index < 1 || index > GetTotalFrames())
+		{
 			Debug.Log("Please specify an index between 1 and " + GetTotalFrames() + ".");
 			return null;
 		}
-		return Frames[index-1];
+		return Frames[index - 1];
 	}
 
-	public Frame GetFrame(float time) {
-		if(time < 0f || time > GetTotalTime()) {
+	public Frame GetFrame(float time)
+	{
+		if (time < 0f || time > GetTotalTime())
+		{
 			Debug.Log("Please specify a time between 0 and " + GetTotalTime() + ".");
 			return null;
 		}
 		return GetFrame(Mathf.Min(Mathf.RoundToInt(time * Framerate) + 1, GetTotalFrames()));
 	}
 
-	public Frame[] GetFrames(int start, int end) {
-		if(start < 1 || end > GetTotalFrames()) {
+	public Frame[] GetFrames(int start, int end)
+	{
+		if (start < 1 || end > GetTotalFrames())
+		{
 			Debug.Log("Please specify indices between 1 and " + GetTotalFrames() + ".");
 			return null;
 		}
-		int count = end-start+1;
+		int count = end - start + 1;
 		Frame[] frames = new Frame[count];
-		for(int i=start; i<=end; i++) {
-			frames[i-start] = Frames[i-1];
+		for (int i = start; i <= end; i++)
+		{
+			frames[i - start] = Frames[i - 1];
 		}
 		return frames;
 	}
 
-	public Frame[] GetFrames(float start, float end) {
-		if(start < 0f || end > GetTotalTime()) {
+	public Frame[] GetFrames(float start, float end)
+	{
+		if (start < 0f || end > GetTotalTime())
+		{
 			Debug.Log("Please specify times between 0 and " + GetTotalTime() + ".");
 			return null;
 		}
 		return GetFrames(GetFrame(start).Index, GetFrame(end).Index);
 	}
 
-	public void AddModule(Module.TYPE type) {
-		if(System.Array.Find(Modules, x => x.Type() == type)) {
+	public void AddModule(Module.TYPE type)
+	{
+		if (System.Array.Find(Modules, x => x.Type() == type))
+		{
 			Debug.Log("Module of type " + type.ToString() + " already exists.");
-		} else {
-			switch(type) {
+		}
+		else
+		{
+			switch (type)
+			{
 				case Module.TYPE.Trajectory:
-				ArrayExtensions.Add(ref Modules, ScriptableObject.CreateInstance<TrajectoryModule>().Initialise(this));
-				break;
+					ArrayExtensions.Add(ref Modules, ScriptableObject.CreateInstance<TrajectoryModule>().Initialise(this));
+					break;
 				case Module.TYPE.Style:
-				ArrayExtensions.Add(ref Modules, ScriptableObject.CreateInstance<StyleModule>().Initialise(this));
-				break;
+					ArrayExtensions.Add(ref Modules, ScriptableObject.CreateInstance<StyleModule>().Initialise(this));
+					break;
 				case Module.TYPE.Phase:
-				ArrayExtensions.Add(ref Modules, ScriptableObject.CreateInstance<PhaseModule>().Initialise(this));
-				break;
+					ArrayExtensions.Add(ref Modules, ScriptableObject.CreateInstance<PhaseModule>().Initialise(this));
+					break;
 				default:
-				Debug.Log("Module of type " + type.ToString() + " not considered.");
-				return;
+					Debug.Log("Module of type " + type.ToString() + " not considered.");
+					return;
 			}
-			AssetDatabase.AddObjectToAsset(Modules[Modules.Length-1], this);
+			AssetDatabase.AddObjectToAsset(Modules[Modules.Length - 1], this);
 		}
 	}
 
-	public void RemoveModule(Module.TYPE type) {
+	public void RemoveModule(Module.TYPE type)
+	{
 		Module module = GetModule(type);
-		if(!module) {
+		if (!module)
+		{
 			Debug.Log("Module of type " + type.ToString() + " does not exist.");
-		} else {
+		}
+		else
+		{
 			ArrayExtensions.Remove(ref Modules, module);
 			Utility.Destroy(module);
 		}
 	}
 
-	public Module GetModule(Module.TYPE type) {
+	public Module GetModule(Module.TYPE type)
+	{
 		return System.Array.Find(Modules, x => x.Type() == type);
 	}
 
-	public Vector3 GetAxis(AXIS axis) {
-		switch(axis) {
+	public Vector3 GetAxis(AXIS axis)
+	{
+		switch (axis)
+		{
 			case AXIS.XPositive:
-			return Vector3.right;
+				return Vector3.right;
 			case AXIS.YPositive:
-			return Vector3.up;
+				return Vector3.up;
 			case AXIS.ZPositive:
-			return Vector3.forward;
+				return Vector3.forward;
 			case AXIS.XNegative:
-			return -Vector3.right;
+				return -Vector3.right;
 			case AXIS.YNegative:
-			return -Vector3.up;
+				return -Vector3.up;
 			case AXIS.ZNegative:
-			return -Vector3.forward;
+				return -Vector3.forward;
 			default:
-			return Vector3.zero;
+				return Vector3.zero;
 		}
 	}
 
-	public void AddSequence() {
+	public void AddSequence()
+	{
 		ArrayExtensions.Add(ref Sequences, new Sequence(this));
 	}
 
-	public void AddSequence(int start, int end) {
+	public void AddSequence(int start, int end)
+	{
 		ArrayExtensions.Add(ref Sequences, new Sequence(this, start, end));
 	}
 
-	public void RemoveSequence() {
+	public void RemoveSequence()
+	{
 		ArrayExtensions.Shrink(ref Sequences);
 	}
 
-	public void RemoveSequence(int index) {
+	public void RemoveSequence(int index)
+	{
 		ArrayExtensions.RemoveAt(ref Sequences, index);
 	}
 
-	public void DetectSymmetry() {
+	public void DetectSymmetry()
+	{
 		Symmetry = new int[Source.Bones.Length];
-		for(int i=0; i<Source.Bones.Length; i++) {
+		for (int i = 0; i < Source.Bones.Length; i++)
+		{
 			string name = Source.Bones[i].Name;
-			if(name.Contains("Left")) {
+			if (name.Contains("Left"))
+			{
 				int pivot = name.IndexOf("Left");
-				Hierarchy.Bone bone = Source.FindBone(name.Substring(0, pivot)+"Right"+name.Substring(pivot+4));
-				if(bone == null) {
+				Hierarchy.Bone bone = Source.FindBone(name.Substring(0, pivot) + "Right" + name.Substring(pivot + 4));
+				if (bone == null)
+				{
 					Debug.Log("Could not find mapping for " + name + ".");
-				} else {
+				}
+				else
+				{
 					Symmetry[i] = bone.Index;
 				}
-			} else if(name.Contains("Right")) {
+			}
+			else if (name.Contains("Right"))
+			{
 				int pivot = name.IndexOf("Right");
-				Hierarchy.Bone bone = Source.FindBone(name.Substring(0, pivot)+"Left"+name.Substring(pivot+5));
-				if(bone == null) {
+				Hierarchy.Bone bone = Source.FindBone(name.Substring(0, pivot) + "Left" + name.Substring(pivot + 5));
+				if (bone == null)
+				{
 					Debug.Log("Could not find mapping for " + name + ".");
-				} else {
+				}
+				else
+				{
 					Symmetry[i] = bone.Index;
 				}
-			} else if(name.StartsWith("L") && char.IsUpper(name[1])) {
-				Hierarchy.Bone bone = Source.FindBone("R"+name.Substring(1));
-				if(bone == null) {
+			}
+			else if (name.StartsWith("L") && char.IsUpper(name[1]))
+			{
+				Hierarchy.Bone bone = Source.FindBone("R" + name.Substring(1));
+				if (bone == null)
+				{
 					Debug.Log("Could not find mapping for " + name + ".");
-				} else {
+				}
+				else
+				{
 					Symmetry[i] = bone.Index;
 				}
-			} else if(name.StartsWith("R") && char.IsUpper(name[1])) {
-				Hierarchy.Bone bone = Source.FindBone("L"+name.Substring(1));
-				if(bone == null) {
+			}
+			else if (name.StartsWith("R") && char.IsUpper(name[1]))
+			{
+				Hierarchy.Bone bone = Source.FindBone("L" + name.Substring(1));
+				if (bone == null)
+				{
 					Debug.Log("Could not find mapping for " + name + ".");
-				} else {
+				}
+				else
+				{
 					Symmetry[i] = bone.Index;
 				}
-			} else {
+			}
+			else
+			{
 				Symmetry[i] = i;
 			}
 		}
 	}
 
-	public void SetSymmetry(int source, int target) {
-		if(Symmetry[source] != target) {
+	public void SetSymmetry(int source, int target)
+	{
+		if (Symmetry[source] != target)
+		{
 			Symmetry[source] = target;
 		}
 	}
 
-	public void SpawnJumpTarget(int footContactRefIdx) {
+	public void SpawnJumpTarget(int footContactRefIdx)
+	{
 
-		int totalFrames = GetTotalFrames()-1;
+		int totalFrames = GetTotalFrames() - 1;
 		Frame[] currentFrames = GetFrames(1, totalFrames);
-	
+
 		Vector3 footContactFirstFrame = currentFrames[0].GetBoneTransformation(footContactRefIdx, false).GetPosition();
 		Vector3 footContactLastFrame = currentFrames[^1].GetBoneTransformation(footContactRefIdx, false).GetPosition();
 
+        GameObject plane = GameObject.Find("Plane");
+        if (plane == null)
+        {
+            Debug.Log("No plane in scene please add a plane gameobject.");
+        }
+
+		float planeX = plane.transform.position.x;
+		float planeZ = plane.transform.position.z;
+
+		float jumpDiff = footContactLastFrame.y - footContactFirstFrame.y;
 		// Jump Up
-		if((footContactLastFrame.y - footContactFirstFrame.y) > 0.01f) {
+		if (jumpDiff > 0.01f)
+		{
 			Debug.Log("Jump Up");
+			plane.transform.position = new Vector3(planeX, footContactFirstFrame.y, planeZ);
 			Vector3 cubeSize = new Vector3(0.5f, 0.5f, 0.3f);
 			GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			//Create the cube on "Ground" layer index 9
@@ -218,18 +286,36 @@ public class MotionData : ScriptableObject {
 			// Adjust position to align the top of the cube with footContact
 			cube.transform.position = footContactLastFrame - new Vector3(0, cubeSize.y / 2, 0);
 			JumpTarget = cube;
-		} else {  //Jump Flat
+		}
+		else if (jumpDiff < -0.01f)
+		{
+			Debug.Log("Jump Down");
+			plane.transform.position = new Vector3(planeX, footContactLastFrame.y, planeZ);
+			Vector3 cubeSize = new Vector3(0.5f, 0.5f, 0.3f);
+			GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			//Create the cube on "Ground" layer index 9
+			cube.layer = 9;
+			cube.transform.localScale = cubeSize;
+			// Adjust position to align the top of the cube with footContact
+			cube.transform.position = footContactFirstFrame - new Vector3(0, cubeSize.y / 2, 0.1f);
+			JumpTarget = cube;
+		}
+		else
+		{  //Jump Flat
 			Debug.Log("Jump Flat");
+			plane.transform.position = new Vector3(planeX, footContactFirstFrame.y, planeZ);
 			float highestFootPosition = footContactFirstFrame.y;
 			int highestFootPositionFrameIdx = 0;
-			for (int i = 0; i < totalFrames; i++) {
+			for (int i = 0; i < totalFrames; i++)
+			{
 				float currentYPostion = currentFrames[i].GetBoneTransformation(footContactRefIdx, false).GetPosition().y;
-				if (currentYPostion > highestFootPosition) {
+				if (currentYPostion > highestFootPosition)
+				{
 					highestFootPosition = currentYPostion;
 					highestFootPositionFrameIdx = i;
 				}
 			}
-			
+
 			// Scale the sphere based on distance travelled (smaller jump = smaller sphere)
 			float zDiff = footContactLastFrame.z - footContactFirstFrame.z;
 			Vector3 sphereSize = new Vector3(zDiff, zDiff, zDiff);
@@ -240,56 +326,63 @@ public class MotionData : ScriptableObject {
 
 			// Adjust sphere position based on highest point reached in jump + jump distance
 			Vector3 highestFootRefPostion = currentFrames[highestFootPositionFrameIdx].GetBoneTransformation(footContactRefIdx, false).GetPosition();
-			sphere.transform.position = highestFootRefPostion - new Vector3(0, highestFootRefPostion.y + zDiff/2.5f, zDiff/3f);
+			sphere.transform.position = new Vector3(0, highestFootRefPostion.y - zDiff/1.8f,  zDiff / 1.5f);
 
 			JumpTarget = sphere;
 		}
 
-		// TODO JUMP DOWN
-
 		// Set color to yellow
 		Renderer renderer = JumpTarget.GetComponent<Renderer>();
-        if (renderer != null)
-        {
+		if (renderer != null)
+		{
 			// Use shared material to avoid memory leaks
-            renderer.sharedMaterial.color = Color.yellow;;
-        }
+			renderer.sharedMaterial.color = Color.yellow; ;
+		}
 	}
 
-	public void DestroyJumpTarget() {
+	public void DestroyJumpTarget()
+	{
 		if (JumpTarget != null)
-        {
-            DestroyImmediate(JumpTarget);
-            JumpTarget = null;
-        }
+		{
+			DestroyImmediate(JumpTarget);
+			JumpTarget = null;
+		}
 	}
 
 	[System.Serializable]
-	public class Hierarchy {
+	public class Hierarchy
+	{
 		public Bone[] Bones;
 
 		private string[] Names;
 
-		public Hierarchy() {
+		public Hierarchy()
+		{
 			Bones = new Bone[0];
 		}
 
-		public void AddBone(string name, string parent) {
+		public void AddBone(string name, string parent)
+		{
 			ArrayExtensions.Add(ref Bones, new Bone(Bones.Length, name, parent));
 		}
 
-		public Bone FindBone(string name) {
+		public Bone FindBone(string name)
+		{
 			return System.Array.Find(Bones, x => x.Name == name);
 		}
 
-		public Bone FindBoneContains(string name) {
+		public Bone FindBoneContains(string name)
+		{
 			return System.Array.Find(Bones, x => x.Name.Contains(name));
 		}
 
-		public string[] GetNames() {
-			if(Names == null || Names.Length == 0) {
+		public string[] GetNames()
+		{
+			if (Names == null || Names.Length == 0)
+			{
 				Names = new string[Bones.Length];
-				for(int i=0; i<Bones.Length; i++) {
+				for (int i = 0; i < Bones.Length; i++)
+				{
 					Names[i] = Bones[i].Name;
 				}
 			}
@@ -297,13 +390,15 @@ public class MotionData : ScriptableObject {
 		}
 
 		[System.Serializable]
-		public class Bone {
+		public class Bone
+		{
 			public int Index = -1;
 			public string Name = "";
 			public string Parent = "";
 			public Vector3 Alignment = Vector3.zero;
 			public bool Active = true;
-			public Bone(int index, string name, string parent) {
+			public Bone(int index, string name, string parent)
+			{
 				Index = index;
 				Name = name;
 				Parent = parent;
@@ -314,80 +409,103 @@ public class MotionData : ScriptableObject {
 	}
 
 	[System.Serializable]
-	public class Sequence {
+	public class Sequence
+	{
 		public MotionData Data;
 		public int Start;
 		public int End;
 
-		public Sequence(MotionData data) {
+		public Sequence(MotionData data)
+		{
 			Data = data;
 			SetStart(1);
 			SetEnd(data.GetTotalFrames());
 		}
 
-		public Sequence(MotionData data, int start, int end) {
+		public Sequence(MotionData data, int start, int end)
+		{
 			Data = data;
 			SetStart(start);
 			SetEnd(end);
 		}
 
-		public int GetLength() {
+		public int GetLength()
+		{
 			return End - Start + 1;
 		}
-		
-		public float GetDuration() {
+
+		public float GetDuration()
+		{
 			return (float)GetLength() / Data.Framerate;
 		}
 
-		public void SetStart(int value) {
+		public void SetStart(int value)
+		{
 			Start = Mathf.Clamp(value, 1, Data.GetTotalFrames());
 		}
 
-		public void SetEnd(int value) {
+		public void SetEnd(int value)
+		{
 			End = Mathf.Clamp(value, 1, Data.GetTotalFrames());
 		}
 	}
 
-	public void Repair(MotionEditor editor) {
+	public void Repair(MotionEditor editor)
+	{
 		//Repair
-		for(int i=0; i<Modules.Length; i++) {
-			if(Modules[i] == null) {
+		for (int i = 0; i < Modules.Length; i++)
+		{
+			if (Modules[i] == null)
+			{
 				ArrayExtensions.RemoveAt(ref Modules, i);
 				i--;
 			}
 		}
 		Object[] objects = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(this));
-		foreach(Object o in objects) {
-			if(o is Module) {
-				if(ArrayExtensions.Contains(ref Modules, (Module)o)) {
-				//	Debug.Log(((Module)o).Type().ToString() + " contained.");
-				} else {
+		foreach (Object o in objects)
+		{
+			if (o is Module)
+			{
+				if (ArrayExtensions.Contains(ref Modules, (Module)o))
+				{
+					//	Debug.Log(((Module)o).Type().ToString() + " contained.");
+				}
+				else
+				{
 					ArrayExtensions.Add(ref Modules, (Module)o);
-				//	Debug.Log(((Module)o).Type().ToString() + " missing.");
+					//	Debug.Log(((Module)o).Type().ToString() + " missing.");
 				}
 			}
 		}
 
 		//Repair
 		StyleModule styleModule = (StyleModule)GetModule(Module.TYPE.Style);
-		if(styleModule != null) {
-			if(styleModule.Keys.Length != styleModule.Data.GetTotalFrames()) {
+		if (styleModule != null)
+		{
+			if (styleModule.Keys.Length != styleModule.Data.GetTotalFrames())
+			{
 				styleModule.Keys = new bool[styleModule.Data.GetTotalFrames()];
 				styleModule.Keys[0] = true;
-				styleModule.Keys[styleModule.Keys.Length-1] = true;
-				for(int i=1; i<styleModule.Keys.Length-1; i++) {
-					for(int j=0; j<styleModule.Functions.Length; j++) {
-						if(styleModule.Functions[j].Values[i] == 0f && styleModule.Functions[j].Values[i+1] != 0f) {
+				styleModule.Keys[styleModule.Keys.Length - 1] = true;
+				for (int i = 1; i < styleModule.Keys.Length - 1; i++)
+				{
+					for (int j = 0; j < styleModule.Functions.Length; j++)
+					{
+						if (styleModule.Functions[j].Values[i] == 0f && styleModule.Functions[j].Values[i + 1] != 0f)
+						{
 							styleModule.Keys[i] = true;
 						}
-						if(styleModule.Functions[j].Values[i] == 1f && styleModule.Functions[j].Values[i+1] != 1f) {
+						if (styleModule.Functions[j].Values[i] == 1f && styleModule.Functions[j].Values[i + 1] != 1f)
+						{
 							styleModule.Keys[i] = true;
 						}
-						if(styleModule.Functions[j].Values[i] != 0f && styleModule.Functions[j].Values[i+1] == 0f) {
-							styleModule.Keys[i+1] = true;
+						if (styleModule.Functions[j].Values[i] != 0f && styleModule.Functions[j].Values[i + 1] == 0f)
+						{
+							styleModule.Keys[i + 1] = true;
 						}
-						if(styleModule.Functions[j].Values[i] != 1f && styleModule.Functions[j].Values[i+1] == 1f) {
-							styleModule.Keys[i+1] = true;
+						if (styleModule.Functions[j].Values[i] != 1f && styleModule.Functions[j].Values[i + 1] == 1f)
+						{
+							styleModule.Keys[i + 1] = true;
 						}
 					}
 				}
