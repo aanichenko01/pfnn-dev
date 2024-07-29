@@ -9,7 +9,7 @@ using UnityEditor;
 namespace PFNN_DEV
 {
 	[RequireComponent(typeof(Actor))]
-	public class BioAnimation_F42_v5_1 : MonoBehaviour
+	public class BioAnimation_F42_v1 : MonoBehaviour
 	{
 
 		public bool Inspect = false;
@@ -174,18 +174,6 @@ namespace PFNN_DEV
 			for (int i = RootPointIndex; i < Trajectory.Points.Length; i++)
 			{
 				float weight = (float)(i - RootPointIndex) / (float)FuturePoints; //w between 0 and 1
-
-				float yDiff = Trajectory.Points[i].GetPosition().y - Trajectory.Points[i - 1].GetPosition().y;
-
-				// Debug.Log(yDiff);
-				if (Math.Abs(yDiff) > 0.001f)
-				{
-					// Debug.Log("Jump!");
-					style[0] = 0f;
-					style[1] = 0f;
-					style[2] = 1f;
-
-				}
 
 				for (int j = 0; j < Trajectory.Points[i].Styles.Length; j++)
 				{
@@ -461,15 +449,15 @@ namespace PFNN_DEV
 		}
 
 #if UNITY_EDITOR
-		[CustomEditor(typeof(BioAnimation_F42_v5_1))]
-		public class BioAnimation_F42_v5_1_Editor : Editor
+		[CustomEditor(typeof(BioAnimation_F42_v1))]
+		public class BioAnimation_F42_v1_Editor : Editor
 		{
 
-			public BioAnimation_F42_v5_1 Target;
+			public BioAnimation_F42_v1 Target;
 
 			void Awake()
 			{
-				Target = (BioAnimation_F42_v5_1)target;
+				Target = (BioAnimation_F42_v1)target;
 			}
 
 			public override void OnInspectorGUI()
