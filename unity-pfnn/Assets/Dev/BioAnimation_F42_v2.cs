@@ -172,6 +172,23 @@ namespace PFNN_DEV
 			// 	style[1] = Mathf.Max(style[1], Mathf.Clamp(Trajectory.Points[RootPointIndex].GetVelocity().magnitude, 0f, 1f));
 			// }
 			// TODO IF ANY OF THE POINTS ARE TOUCHING CUBE THE CHANGE the style array above to be 1 for jump
+
+			// Iterate over all points in the trajectory starting from RootPointIndex
+			for (int i = RootPointIndex; i < Trajectory.Points.Length; i++)
+			{
+
+				float yDiff = Trajectory.Points[i].GetPosition().y - Trajectory.Points[i - 1].GetPosition().y;
+				if (Math.Abs(yDiff) > 0.001f)
+				{
+					// Debug.Log("Jump!");
+					style[0] = 0f;
+					style[1] = 0f;
+					style[2] = 0.5f;
+					break;
+
+				}
+			}
+
 			for (int i = RootPointIndex; i < Trajectory.Points.Length; i++)
 			{
 				float weight = (float)(i - RootPointIndex) / (float)FuturePoints; //w between 0 and 1

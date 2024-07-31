@@ -128,9 +128,18 @@ public class Frame
 		// if (jump)
 		// {
 		// 	Vector3 hipPositionFirstFrame = GetFirstFrame().GetBoneTransformation(0, mirrored, Data.RootSmoothing).GetPosition();
-		// 	Vector3 groundPositionFirstFrame = Utility.ProjectGround(hipPositionFirstFrame, Data.Ground);
+		// 	Vector3 hipPositionLastFrame = GetLastFrame().GetBoneTransformation(0, mirrored, Data.RootSmoothing).GetPosition();
+			
+		// 	Vector3 hipPostion;
+		// 	if(hipPositionFirstFrame.y - hipPositionLastFrame.y > 0) {
+		// 		hipPostion = hipPositionLastFrame;
+		// 	} else {
+		// 		hipPostion = hipPositionFirstFrame;
+		// 	}
+			
+		// 	Vector3 groundPositionFromFrame = Utility.ProjectGround(hipPostion, Data.Ground);
 
-		// 	float desiredDistance = Vector3.Distance(hipPositionFirstFrame, groundPositionFirstFrame);
+		// 	float desiredDistance = Vector3.Distance(hipPostion, groundPositionFromFrame);
 
 		// 	Vector3 jumpRootPostion = new Vector3(
 		// 		currentHipPosition.x,
