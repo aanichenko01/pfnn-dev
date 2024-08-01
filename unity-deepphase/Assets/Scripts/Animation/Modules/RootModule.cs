@@ -226,11 +226,16 @@ namespace AI4Animation {
 
 			Quaternion RootRotation(Frame frame) {
 				if(topology == TOPOLOGY.Biped) {
-					Vector3 v1 = Vector3.ProjectOnPlane(frame.GetBoneTransformation(RightHip, mirrored).GetPosition() - frame.GetBoneTransformation(LeftHip, mirrored).GetPosition(), Vector3.up).normalized;
-					Vector3 v2 = Vector3.ProjectOnPlane(frame.GetBoneTransformation(RightShoulder, mirrored).GetPosition() - frame.GetBoneTransformation(LeftShoulder, mirrored).GetPosition(), Vector3.up).normalized;
-					Vector3 v = (v1+v2).normalized;
-					Vector3 forward = Vector3.ProjectOnPlane(Vector3.Cross(v, Vector3.up), Vector3.up).normalized;
-					return forward == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(forward, Vector3.up);
+					// Vector3 v1 = Vector3.ProjectOnPlane(frame.GetBoneTransformation(RightHip, mirrored).GetPosition() - frame.GetBoneTransformation(LeftHip, mirrored).GetPosition(), Vector3.up).normalized;
+					// Vector3 v2 = Vector3.ProjectOnPlane(frame.GetBoneTransformation(RightShoulder, mirrored).GetPosition() - frame.GetBoneTransformation(LeftShoulder, mirrored).GetPosition(), Vector3.up).normalized;
+					// Vector3 v = (v1+v2).normalized;
+					// Vector3 forward = Vector3.ProjectOnPlane(Vector3.Cross(v, Vector3.up), Vector3.up).normalized;
+					// return forward == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(forward, Vector3.up);
+					// For Purpose of creature calculate Biped root like quadraped based on neck and hips
+					Vector3 neck = frame.GetBoneTransformation(Neck, mirrored).GetPosition();
+					Vector3 hips = frame.GetBoneTransformation(Hips, mirrored).GetPosition();
+					Vector3 forward = Vector3.ProjectOnPlane(neck - hips, Vector3.up).normalized;;
+					return forward == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(forward.normalized, Vector3.up);
 				}
 				if(topology == TOPOLOGY.Quadruped) {
 					Vector3 neck = frame.GetBoneTransformation(Neck, mirrored).GetPosition();
