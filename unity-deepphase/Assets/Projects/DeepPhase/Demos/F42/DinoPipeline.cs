@@ -438,7 +438,7 @@ namespace DeepPhase {
                 string[] styles = new string[]{"Idle", "Move", "Speed"};
                 // string[] styles = new string[]{"Speed"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
-                string[] contacts = new string[]{"LeftFootSite", "RightFootSite"};
+                string[] contacts = new string[]{"AnzB:LeftFootIndex4", "AnzB:RightFootIndex4"};
 
                 //Input
                 //Control
@@ -534,7 +534,7 @@ namespace DeepPhase {
                 string[] styles = new string[]{"Idle", "Move", "Speed"};
                 // string[] styles = new string[]{"Speed"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
-                string[] contacts = new string[]{"LeftFootSite", "RightFootSite"};
+                string[] contacts = new string[]{"AnzB:LeftFootIndex4", "AnzB:RightFootIndex4"};
 
                 //Input
                 //Control
@@ -649,8 +649,8 @@ namespace DeepPhase {
                 string[] styles = new string[]{"Idle", "Move", "Speed"};
                 // string[] gating = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
-                string[] gating = new string[]{"LeftFootSite", "RightFootSite"};
-                string[] contacts = new string[]{"LeftFootSite", "RightFootSite"};
+                string[] gating = new string[]{"AnzB:LeftFootIndex4", "AnzB:RightFootIndex4"};
+                string[] contacts = new string[]{"AnzB:LeftFootIndex4", "AnzB:RightFootIndex4"};
 
                 //Input
                 //Control

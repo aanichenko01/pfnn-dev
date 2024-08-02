@@ -1,0 +1,9 @@
+# Python gitignore ####################################################################################################
+
+# Ignore data and wights
+Data/
+Dataset/
+Training/
+
+# Ignore Python cache files
+__pycache__/
