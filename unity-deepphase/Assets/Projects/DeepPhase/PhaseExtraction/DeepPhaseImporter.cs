@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections;
+using UnityEngine.UIElements;
 
 namespace AI4Animation {
 	public class DeepPhaseImporter : EditorWindow {
@@ -87,7 +88,13 @@ namespace AI4Animation {
             yield return new WaitForSeconds(0f);
 
             DeepPhaseModule module = null;
-
+            // TODO DELETE BETWEEN HERE HACK TO MAKE WORK ON ONLY ONE SEQUENCE
+            // Editor.LoadSession('94b7c9164e61f734e8c810112e5d0e34');
+            MotionAsset asset = Editor.GetSession().Asset;
+            asset.RemoveModule<DeepPhaseModule>(Tag);
+            module = asset.AddModule<DeepPhaseModule>(Tag);
+            module.CreateChannels(5);
+            
             Count = 0;
             while(Coroutine != null && !sequenceFile.EndOfStream) {
                 string sLine = sequenceFile.ReadLine();
@@ -100,13 +107,14 @@ namespace AI4Animation {
                 bool fileMirrored = tags[2] == "Standard" ? false : true;
                 int fileFrame = tags[1].ToInt();
                 int channels = features.Length / 4;
-                if(Editor.Asset != fileGUID) {
-                    Editor.LoadSession(fileGUID);
-                    MotionAsset asset = Editor.GetSession().Asset;
-                    asset.RemoveModule<DeepPhaseModule>(Tag);
-                    module = asset.AddModule<DeepPhaseModule>(Tag);
-                    module.CreateChannels(channels);
-                }
+                // if(Editor.Asset != fileGUID) {
+                //     Editor.LoadSession(fileGUID);
+                //     MotionAsset asset = Editor.GetSession().Asset;
+                //     asset = Editor.GetSession().Asset;
+                //     asset.RemoveModule<DeepPhaseModule>(Tag);
+                //     module = asset.AddModule<DeepPhaseModule>(Tag);
+                //     module.CreateChannels(channels);
+                // }
 
                 for(int i=0; i<channels; i++) {
                     float phaseValue = Mathf.Repeat(features[0*channels+i], 1f);
@@ -119,6 +127,8 @@ namespace AI4Animation {
                         module.Channels[i].MirroredAmplitudes[fileFrame-1] = amplitude;
                         module.Channels[i].MirroredOffsets[fileFrame-1] = offset;
                     } else {
+                        // Debug.Log(module.Channels[i]);
+                        Debug.Log(module.Channels[i].RegularPhaseValues.Length);
                         module.Channels[i].RegularPhaseValues[fileFrame-1] = phaseValue;
                         module.Channels[i].RegularFrequencies[fileFrame-1] = frequency;
                         module.Channels[i].RegularAmplitudes[fileFrame-1] = amplitude;

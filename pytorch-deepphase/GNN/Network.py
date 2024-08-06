@@ -96,8 +96,11 @@ class ExpertLinear(torch.nn.Module):
 if __name__ == '__main__':
 
     load = "Data"
-    gating_indices = torch.tensor([(1845 + i) for i in range(130)])
-    main_indices = torch.tensor([(0 + i) for i in range(1845)])
+    gating_indices = torch.tensor([(429 + i) for i in range(130)])
+    main_indices = torch.tensor([(0 + i) for i in range(429)])
+    # Dino
+    # gating_indices = torch.tensor([(1845 + i) for i in range(130)])
+    # main_indices = torch.tensor([(0 + i) for i in range(1845)])
 
     save = "./Training"
 
@@ -113,6 +116,7 @@ if __name__ == '__main__':
     utility.SetSeed(23456)
 
     epochs = 150
+    # epochs = 15
     batch_size = 32
     dropout = 0.3
     gating_hidden = 64

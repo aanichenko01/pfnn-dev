@@ -19,10 +19,13 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     #Start Parameter Section
-    window = 2.0 #time duration of the time window
-    # fps = 60 #fps of the motion capture data
-    fps = 30 #fps of the motion capture data
-    joints = 144 #joints of the character skeleton
+    window = 2.0 #time duration of the time window TODO THIS MIGHT BE HAVING A BIG IMPACT
+    fps = 60 #fps of the motion capture data
+    joints = 26 #joints of the character skeleton
+    
+    # Dino
+    # fps = 30 #fps of the motion capture data
+    # joints = 144 #joints of the character skeleton
 
     frames = int(window * fps) + 1
     input_channels = 3*joints #number of channels along time in the input data (here 3*J as XYZ-component of each joint)

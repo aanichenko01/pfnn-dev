@@ -12,6 +12,9 @@
 Assets/Projects/DeepPhase/Demos/F42/Data/
 Assets/Projects/DeepPhase/Demos/F42/Assets/
 
+# Ignore additional Quadruped Data
+Assets/Projects/DeepPhase/Demos/Quadruped/Assets*
+
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 /[Ll]ibrary/
