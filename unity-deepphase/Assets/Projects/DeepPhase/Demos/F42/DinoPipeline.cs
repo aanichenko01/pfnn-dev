@@ -255,17 +255,15 @@ namespace DeepPhase {
                     //MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).ResetSequences();
                     MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).Export = false;
                 }
+
+                // TODO UPDATE THIS 
                 // Idle static
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 37);
-                
-                // Jump Horiz Flat
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 26);
 
-                // Jump Up
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 25);
+                // Walk
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 190);
 
                 for(int i=0; i<Pipeline.GetEditor().Assets.Count; i++) {
                     MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).MarkDirty(true, false);

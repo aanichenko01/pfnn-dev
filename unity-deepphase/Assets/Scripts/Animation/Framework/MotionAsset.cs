@@ -15,8 +15,8 @@ namespace AI4Animation {
 		public Interval[] Sequences = new Interval[0];
 
 		public float Framerate = 1f;
-
 		public string Model = string.Empty;
+
 		public Vector3 Translation = Vector3.zero;
 		public Vector3 Rotation = Vector3.zero;
 		public float Scale = 1f;

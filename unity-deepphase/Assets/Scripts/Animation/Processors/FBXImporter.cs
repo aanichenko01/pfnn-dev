@@ -4,6 +4,7 @@ using UnityEditor;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Recorder;
 
 namespace AI4Animation {
 	public class FBXImporter : BatchProcessor {
@@ -11,6 +12,8 @@ namespace AI4Animation {
 		public string Source = string.Empty;
 		public string Destination = string.Empty;
 		public Actor Skeleton = null;
+
+		public int Framerate = 60;
 
 		private List<string> Imported;
 		private List<string> Skipped;
@@ -43,6 +46,7 @@ namespace AI4Animation {
 			EditorGUILayout.EndHorizontal();
 
 			Skeleton = EditorGUILayout.ObjectField("Skeleton", Skeleton, typeof(Actor), true) as Actor;
+			Framerate = EditorGUILayout.IntField("Framerate", Framerate);
 
 			if(Utility.GUIButton("Load Source Directory", UltiDraw.DarkGrey, UltiDraw.White)) {
 				LoadDirectory(Source);
@@ -119,7 +123,7 @@ namespace AI4Animation {
 					ArrayExtensions.Resize(ref asset.Frames, Mathf.RoundToInt(clip.frameRate * clip.length));
 
 					//Set Framerate
-					asset.Framerate = clip.frameRate;
+					asset.Framerate = Framerate;
 
 					//Create Model
 					GameObject instance = Instantiate(go) as GameObject;

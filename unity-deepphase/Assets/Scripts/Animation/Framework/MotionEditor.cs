@@ -163,6 +163,7 @@ namespace AI4Animation {
 				if(Actor == null) {
 					BoneMapping = null;
 					{
+						Debug.Log(Asset.Model);
 						if(Asset.Model != string.Empty) {
 							Transform t = Editor.transform.Find(Asset.Model);
 							if(t != null) {
