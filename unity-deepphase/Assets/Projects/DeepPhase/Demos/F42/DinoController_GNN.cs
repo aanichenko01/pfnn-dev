@@ -114,12 +114,13 @@ namespace DeepPhase {
             face = face.magnitude < 0.25f ? move : face;
 
             //Amplify Factors
-            move = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.position - Camera.transform.position, Vector3.up).normalized, Vector3.up) * move;
+            // move = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.position - Camera.transform.position, Vector3.up).normalized, Vector3.up) * move;
             // if(Controller.QueryLogic("Sprint")) {
             //     move *= SprintSpeed;
             // } else {
             move *= MoveSpeed;
             // }
+            Debug.Log(move);
 
             //Trajectory
             RootSeries.Control(move, face, ControlWeight, PositionBias, DirectionBias, VelocityBias);
