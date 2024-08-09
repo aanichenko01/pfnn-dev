@@ -21,17 +21,17 @@ if __name__ == '__main__':
     #Start Parameter Section
     window = 2.0 #time duration of the time window TODO THIS MIGHT BE HAVING A BIG IMPACT
     fps = 60 #fps of the motion capture data
-    joints = 26 #joints of the character skeleton
+    # joints = 26 #joints of the character skeleton
     
     # Dino
-    # fps = 30 #fps of the motion capture data
-    # joints = 144 #joints of the character skeleton
+    joints = 144 #joints of the character skeleton
 
     frames = int(window * fps) + 1
     input_channels = 3*joints #number of channels along time in the input data (here 3*J as XYZ-component of each joint)
     phase_channels = 5 #desired number of latent phase channels (usually between 2-10)
 
-    epochs = 10
+    # epochs = 10
+    epochs = 30
     batch_size = 32
     learning_rate = 1e-4
     weight_decay = 1e-4

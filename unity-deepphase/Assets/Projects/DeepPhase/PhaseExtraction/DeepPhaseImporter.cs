@@ -89,7 +89,6 @@ namespace AI4Animation {
 
             DeepPhaseModule module = null;
             // TODO DELETE BETWEEN HERE HACK TO MAKE WORK ON ONLY ONE SEQUENCE
-            // Editor.LoadSession('94b7c9164e61f734e8c810112e5d0e34');
             // MotionAsset asset = Editor.GetSession().Asset;
             // asset.RemoveModule<DeepPhaseModule>(Tag);
             // module = asset.AddModule<DeepPhaseModule>(Tag);
