@@ -1,4 +1,5 @@
 import sys
+import os
 sys.path.append("../")
 
 import Library.Utility as utility
@@ -108,6 +109,8 @@ if __name__ == '__main__':
 
     save = "./Training"
 
+    loss_file_path = os.path.join(save, "LossHist.npy")
+
     InputFile = load + "/Input.bin"
     OutputFile = load + "/Output.bin"
     # InputFile = utility.ReadBinary(InputFile, sample_count, input_dim)
@@ -120,7 +123,6 @@ if __name__ == '__main__':
     utility.SetSeed(23456)
 
     epochs = 150
-    # epochs = 15
     batch_size = 32
     dropout = 0.3
     gating_hidden = 64
@@ -156,6 +158,8 @@ if __name__ == '__main__':
     loss_function = torch.nn.MSELoss()
 
     I = np.arange(sample_count)
+
+    loss_hist = np.zeros(epochs)
     for epoch in range(epochs):
         scheduler.step()
         np.random.shuffle(I)
@@ -186,4 +190,8 @@ if __name__ == '__main__':
             input_names=['X'],
             output_names=['Y', 'W']
         )
-        print('Epoch', epoch+1, error/(sample_count/batch_size))
+        avg_loss = error/(sample_count/batch_size)
+        loss_hist[epoch] = avg_loss
+        print('Epoch', epoch+1, avg_loss)
+
+    np.save(loss_file_path, loss_hist)
