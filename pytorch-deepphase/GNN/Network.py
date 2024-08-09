@@ -98,9 +98,13 @@ if __name__ == '__main__':
     load = "Data"
     # gating_indices = torch.tensor([(429 + i) for i in range(130)])
     # main_indices = torch.tensor([(0 + i) for i in range(429)])
-    # Dino
+    # Dino 5 channels
     gating_indices = torch.tensor([(1845 + i) for i in range(130)])
     main_indices = torch.tensor([(0 + i) for i in range(1845)])
+
+    # Dino 3 channels
+    # gating_indices = torch.tensor([(1845 + i) for i in range(78)])
+    # main_indices = torch.tensor([(0 + i) for i in range(1845)])
 
     save = "./Training"
 
@@ -122,6 +126,7 @@ if __name__ == '__main__':
     gating_hidden = 64
     main_hidden = 1024
     experts = 8
+    # experts = 4
 
     learning_rate = 1e-4
     weight_decay = 1e-4

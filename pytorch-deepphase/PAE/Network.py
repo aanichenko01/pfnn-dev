@@ -30,7 +30,6 @@ if __name__ == '__main__':
     input_channels = 3*joints #number of channels along time in the input data (here 3*J as XYZ-component of each joint)
     phase_channels = 5 #desired number of latent phase channels (usually between 2-10)
 
-    # epochs = 10
     epochs = 30
     batch_size = 32
     learning_rate = 1e-4
