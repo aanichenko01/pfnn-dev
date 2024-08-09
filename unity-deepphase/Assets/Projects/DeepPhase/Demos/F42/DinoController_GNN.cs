@@ -98,6 +98,7 @@ namespace DeepPhase {
 
         protected override void Control() {
             UserControl();
+            Debug.Log("Getting user control");
             Feed();
             NeuralNetwork.RunSession();
             Read();
@@ -114,7 +115,7 @@ namespace DeepPhase {
             face = face.magnitude < 0.25f ? move : face;
 
             //Amplify Factors
-            // move = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.position - Camera.transform.position, Vector3.up).normalized, Vector3.up) * move;
+            move = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.position - Camera.transform.position, Vector3.up).normalized, Vector3.up) * move;
             // if(Controller.QueryLogic("Sprint")) {
             //     move *= SprintSpeed;
             // } else {

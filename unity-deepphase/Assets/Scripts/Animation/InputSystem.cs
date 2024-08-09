@@ -4,7 +4,7 @@ using UnityEngine;
 public class InputSystem {
 
 	public enum ControlType { Controller, Keyboard };
-	public ControlType Control = ControlType.Controller;
+	public ControlType Control = ControlType.Keyboard;
 
 	public enum Button {A, B, X, Y, LB, RB};
 
