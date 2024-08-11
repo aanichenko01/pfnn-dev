@@ -5,6 +5,9 @@ Data/
 Dataset/
 Training/
 PAE/History/
+LossHistoryGNN/
+LossPlots/
+GNN/GNNTrainingHist/
 
 # Ignore Python cache files
 __pycache__/

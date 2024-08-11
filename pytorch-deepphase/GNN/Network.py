@@ -99,6 +99,7 @@ if __name__ == '__main__':
     load = "Data"
     # gating_indices = torch.tensor([(429 + i) for i in range(130)])
     # main_indices = torch.tensor([(0 + i) for i in range(429)])
+    
     # Dino 5 channels
     gating_indices = torch.tensor([(1845 + i) for i in range(130)])
     main_indices = torch.tensor([(0 + i) for i in range(1845)])
