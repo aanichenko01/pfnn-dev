@@ -92,7 +92,7 @@ namespace AI4Animation {
             MotionAsset asset = Editor.GetSession().Asset;
             asset.RemoveModule<DeepPhaseModule>(Tag);
             module = asset.AddModule<DeepPhaseModule>(Tag);
-            module.CreateChannels(3);
+            module.CreateChannels(5);
             
             Count = 0;
             while(Coroutine != null && !sequenceFile.EndOfStream) {

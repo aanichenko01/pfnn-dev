@@ -169,12 +169,14 @@ namespace AI4Animation
 
 						//Compute Frames
 						Matrix4x4[] transformations = new Matrix4x4[asset.Source.Bones.Length];
-						for(int i=0; i<asset.GetTotalFrames(); i++) {
+						for (int i = 0; i < asset.GetTotalFrames(); i++)
+						{
 							clip.SampleAnimation(Skeleton.gameObject, (float)i / asset.Framerate);
-							for(int j=0; j<transformations.Length; j++) {
+							for (int j = 0; j < transformations.Length; j++)
+							{
 								transformations[j] = Skeleton.Bones[j].GetTransform().GetWorldMatrix();
 							}
-							asset.Frames[i] = new Frame(asset, i+1, (float)i / asset.Framerate, transformations);
+							asset.Frames[i] = new Frame(asset, i + 1, (float)i / asset.Framerate, transformations);
 						}
 					}
 

@@ -256,12 +256,14 @@ namespace DeepPhase {
                     MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).Export = false;
                 }
 
+                // TOD
+
                 // Idle to Walk
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 1557);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 74);
 
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 437);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 378);
 
                 for(int i=0; i<Pipeline.GetEditor().Assets.Count; i++) {
                     MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).MarkDirty(true, false);

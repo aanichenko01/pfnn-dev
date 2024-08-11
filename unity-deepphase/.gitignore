@@ -12,6 +12,7 @@
 Assets/Projects/DeepPhase/Demos/F42/Data/
 Assets/Projects/DeepPhase/Demos/F42/Assets*
 Assets/Projects/DeepPhase/Demos/F42/Experiments*
+Assets/Resources/AnimClips/
 
 # Ignore additional Quadruped Data
 Assets/Projects/DeepPhase/Demos/Quadruped/Assets*
