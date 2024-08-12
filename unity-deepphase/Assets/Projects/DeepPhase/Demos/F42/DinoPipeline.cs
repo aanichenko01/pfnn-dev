@@ -6,10 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using AI4Animation;
 
-namespace DeepPhase {
-    public class DinoPipeline : AssetPipelineSetup {
+namespace DeepPhase
+{
+    public class DinoPipeline : AssetPipelineSetup
+    {
 
-        public enum MODE {ProcessAssets, ExportController, ExportControllerLMP, ExportControllerMANN};
+        public enum MODE { ProcessAssets, ExportController, ExportControllerLMP, ExportControllerMANN };
         public MODE Mode = MODE.ProcessAssets;
 
         public int Channels = 5;
@@ -24,72 +26,87 @@ namespace DeepPhase {
         private AssetPipeline.Data.File S;
         private AssetPipeline.Data X, Y;
 
-        public override void Inspector() {
+        public override void Inspector()
+        {
             Mode = (MODE)EditorGUILayout.EnumPopup("Mode", Mode);
-            void ExportMode() {
+            void ExportMode()
+            {
                 EditorGUI.BeginDisabledGroup(true);
                 EditorGUILayout.FloatField("Export Framerate", Pipeline.GetEditor().TargetFramerate);
                 EditorGUILayout.TextField("Export Path", AssetPipeline.Data.GetExportPath());
                 EditorGUI.EndDisabledGroup();
-                if(Mode == MODE.ExportController) {
+                if (Mode == MODE.ExportController)
+                {
                     Channels = EditorGUILayout.IntField("Channels", Channels);
                 }
                 WriteMirror = EditorGUILayout.Toggle("Write Mirror", WriteMirror);
-                if(Pipeline.IsProcessing() || Pipeline.IsAborting()) {
+                if (Pipeline.IsProcessing() || Pipeline.IsAborting())
+                {
                     EditorGUI.BeginDisabledGroup(true);
                     EditorGUILayout.FloatField("Samples Per Second", SamplesPerSecond);
                     EditorGUI.EndDisabledGroup();
                     EditorGUI.DrawRect(
                         new Rect(
-                            EditorGUILayout.GetControlRect().x, 
-                            EditorGUILayout.GetControlRect().y, 
+                            EditorGUILayout.GetControlRect().x,
+                            EditorGUILayout.GetControlRect().y,
                             Progress * EditorGUILayout.GetControlRect().width, 25f
-                        ), 
+                        ),
                         UltiDraw.Green.Opacity(0.75f)
                     );
                 }
             }
-            if(Mode == MODE.ProcessAssets) {
+            if (Mode == MODE.ProcessAssets)
+            {
                 //Nothing to do
             }
-            if(Mode == MODE.ExportController) {
+            if (Mode == MODE.ExportController)
+            {
                 ExportMode();
             }
-            if(Mode == MODE.ExportControllerLMP) {
+            if (Mode == MODE.ExportControllerLMP)
+            {
                 ExportMode();
             }
-            if(Mode == MODE.ExportControllerMANN) {
+            if (Mode == MODE.ExportControllerMANN)
+            {
                 ExportMode();
             }
         }
-        
-        public override void Inspector(AssetPipeline.Item item) {
+
+        public override void Inspector(AssetPipeline.Item item)
+        {
 
         }
 
-        public override bool CanProcess() {
+        public override bool CanProcess()
+        {
             return true;
         }
 
-        public override void Begin() {
-            if(Mode == MODE.ProcessAssets) {
+        public override void Begin()
+        {
+            if (Mode == MODE.ProcessAssets)
+            {
                 //Nothing to do
             }
-            if(Mode == MODE.ExportController) {
+            if (Mode == MODE.ExportController)
+            {
                 Samples = 0;
                 Sequence = 0;
                 S = AssetPipeline.Data.CreateFile("Sequences", AssetPipeline.Data.TYPE.Text);
                 X = new AssetPipeline.Data("Input");
                 Y = new AssetPipeline.Data("Output");
             }
-            if(Mode == MODE.ExportControllerLMP) {
+            if (Mode == MODE.ExportControllerLMP)
+            {
                 Samples = 0;
                 Sequence = 0;
                 S = AssetPipeline.Data.CreateFile("Sequences", AssetPipeline.Data.TYPE.Text);
                 X = new AssetPipeline.Data("Input");
                 Y = new AssetPipeline.Data("Output");
             }
-            if(Mode == MODE.ExportControllerMANN) {
+            if (Mode == MODE.ExportControllerMANN)
+            {
                 Samples = 0;
                 Sequence = 0;
                 S = AssetPipeline.Data.CreateFile("Sequences", AssetPipeline.Data.TYPE.Text);
@@ -98,40 +115,53 @@ namespace DeepPhase {
             }
         }
 
-        private void WriteSequenceInfo(int sequence, float timestamp, bool mirrored, MotionAsset asset) {
+        private void WriteSequenceInfo(int sequence, float timestamp, bool mirrored, MotionAsset asset)
+        {
             //Sequence - Timestamp - Mirroring - Name - GUID
             S.WriteLine(
-                sequence.ToString() + AssetPipeline.Data.Separator + 
+                sequence.ToString() + AssetPipeline.Data.Separator +
                 timestamp + AssetPipeline.Data.Separator +
                 (mirrored ? "Mirrored" : "Standard") + AssetPipeline.Data.Separator +
                 asset.name + AssetPipeline.Data.Separator +
                 Utility.GetAssetGUID(asset));
         }
 
-        public override IEnumerator Iterate(MotionAsset asset) {
+        public override IEnumerator Iterate(MotionAsset asset)
+        {
             Pipeline.GetEditor().LoadSession(Utility.GetAssetGUID(asset));
-            if(Mode == MODE.ProcessAssets) {
+            if (Mode == MODE.ProcessAssets)
+            {
                 ProcessAssets(asset);
             }
-            if(Mode == MODE.ExportController) {
-                if(asset.Export) {
-                    for(int i=1; i<=2; i++) {
-                        if(i==1) {
+            if (Mode == MODE.ExportController)
+            {
+                if (asset.Export)
+                {
+                    for (int i = 1; i <= 2; i++)
+                    {
+                        if (i == 1)
+                        {
                             Pipeline.GetEditor().SetMirror(false);
-                        } else if(i==2 && WriteMirror) {
+                        }
+                        else if (i == 2 && WriteMirror)
+                        {
                             Pipeline.GetEditor().SetMirror(true);
-                        } else {
+                        }
+                        else
+                        {
                             break;
                         }
-                        foreach(Interval seq in asset.Sequences) {
+                        foreach (Interval seq in asset.Sequences)
+                        {
                             Sequence += 1;
                             float start = asset.GetFrame(asset.GetFrame(seq.Start).Timestamp).Timestamp;
-                            float end = asset.GetFrame(asset.GetFrame(seq.End).Timestamp - 1f/Pipeline.GetEditor().TargetFramerate).Timestamp;
+                            float end = asset.GetFrame(asset.GetFrame(seq.End).Timestamp - 1f / Pipeline.GetEditor().TargetFramerate).Timestamp;
                             int index = 0;
-                            while(Pipeline.IsProcessing() && (start + index/Pipeline.GetEditor().TargetFramerate < end || Mathf.Approximately(start + index/Pipeline.GetEditor().TargetFramerate, end))) {
-                                float tCurrent = start + index/Pipeline.GetEditor().TargetFramerate;
-                                float tNext = start + (index+1)/Pipeline.GetEditor().TargetFramerate;
-                                index +=1;
+                            while (Pipeline.IsProcessing() && (start + index / Pipeline.GetEditor().TargetFramerate < end || Mathf.Approximately(start + index / Pipeline.GetEditor().TargetFramerate, end)))
+                            {
+                                float tCurrent = start + index / Pipeline.GetEditor().TargetFramerate;
+                                float tNext = start + (index + 1) / Pipeline.GetEditor().TargetFramerate;
+                                index += 1;
 
                                 ControllerSetup.Export(this, X, Y, tCurrent, tNext);
 
@@ -140,7 +170,8 @@ namespace DeepPhase {
                                 WriteSequenceInfo(Sequence, tCurrent, Pipeline.GetEditor().Mirror, asset);
 
                                 Samples += 1;
-                                if(Utility.GetElapsedTime(Timestamp) >= 0.1f) {
+                                if (Utility.GetElapsedTime(Timestamp) >= 0.1f)
+                                {
                                     Progress = end == 0f ? 1f : (tCurrent / end);
                                     SamplesPerSecond = Samples / (float)Utility.GetElapsedTime(Timestamp);
                                     Samples = 0;
@@ -152,25 +183,35 @@ namespace DeepPhase {
                     }
                 }
             }
-            if(Mode == MODE.ExportControllerLMP) {
-                if(asset.Export) {
-                    for(int i=1; i<=2; i++) {
-                        if(i==1) {
+            if (Mode == MODE.ExportControllerLMP)
+            {
+                if (asset.Export)
+                {
+                    for (int i = 1; i <= 2; i++)
+                    {
+                        if (i == 1)
+                        {
                             Pipeline.GetEditor().SetMirror(false);
-                        } else if(i==2 && WriteMirror) {
+                        }
+                        else if (i == 2 && WriteMirror)
+                        {
                             Pipeline.GetEditor().SetMirror(true);
-                        } else {
+                        }
+                        else
+                        {
                             break;
                         }
-                        foreach(Interval seq in asset.Sequences) {
+                        foreach (Interval seq in asset.Sequences)
+                        {
                             Sequence += 1;
                             float start = asset.GetFrame(asset.GetFrame(seq.Start).Timestamp).Timestamp;
-                            float end = asset.GetFrame(asset.GetFrame(seq.End).Timestamp - 1f/Pipeline.GetEditor().TargetFramerate).Timestamp;
+                            float end = asset.GetFrame(asset.GetFrame(seq.End).Timestamp - 1f / Pipeline.GetEditor().TargetFramerate).Timestamp;
                             int index = 0;
-                            while(Pipeline.IsProcessing() && (start + index/Pipeline.GetEditor().TargetFramerate < end || Mathf.Approximately(start + index/Pipeline.GetEditor().TargetFramerate, end))) {
-                                float tCurrent = start + index/Pipeline.GetEditor().TargetFramerate;
-                                float tNext = start + (index+1)/Pipeline.GetEditor().TargetFramerate;
-                                index +=1;
+                            while (Pipeline.IsProcessing() && (start + index / Pipeline.GetEditor().TargetFramerate < end || Mathf.Approximately(start + index / Pipeline.GetEditor().TargetFramerate, end)))
+                            {
+                                float tCurrent = start + index / Pipeline.GetEditor().TargetFramerate;
+                                float tNext = start + (index + 1) / Pipeline.GetEditor().TargetFramerate;
+                                index += 1;
 
                                 ControllerLMPSetup.Export(this, X, Y, tCurrent, tNext);
 
@@ -179,7 +220,8 @@ namespace DeepPhase {
                                 WriteSequenceInfo(Sequence, tCurrent, Pipeline.GetEditor().Mirror, asset);
 
                                 Samples += 1;
-                                if(Utility.GetElapsedTime(Timestamp) >= 0.1f) {
+                                if (Utility.GetElapsedTime(Timestamp) >= 0.1f)
+                                {
                                     Progress = end == 0f ? 1f : (tCurrent / end);
                                     SamplesPerSecond = Samples / (float)Utility.GetElapsedTime(Timestamp);
                                     Samples = 0;
@@ -191,25 +233,35 @@ namespace DeepPhase {
                     }
                 }
             }
-            if(Mode == MODE.ExportControllerMANN) {
-                if(asset.Export) {
-                    for(int i=1; i<=2; i++) {
-                        if(i==1) {
+            if (Mode == MODE.ExportControllerMANN)
+            {
+                if (asset.Export)
+                {
+                    for (int i = 1; i <= 2; i++)
+                    {
+                        if (i == 1)
+                        {
                             Pipeline.GetEditor().SetMirror(false);
-                        } else if(i==2 && WriteMirror) {
+                        }
+                        else if (i == 2 && WriteMirror)
+                        {
                             Pipeline.GetEditor().SetMirror(true);
-                        } else {
+                        }
+                        else
+                        {
                             break;
                         }
-                        foreach(Interval seq in asset.Sequences) {
+                        foreach (Interval seq in asset.Sequences)
+                        {
                             Sequence += 1;
                             float start = asset.GetFrame(asset.GetFrame(seq.Start).Timestamp).Timestamp;
-                            float end = asset.GetFrame(asset.GetFrame(seq.End).Timestamp - 1f/Pipeline.GetEditor().TargetFramerate).Timestamp;
+                            float end = asset.GetFrame(asset.GetFrame(seq.End).Timestamp - 1f / Pipeline.GetEditor().TargetFramerate).Timestamp;
                             int index = 0;
-                            while(Pipeline.IsProcessing() && (start + index/Pipeline.GetEditor().TargetFramerate < end || Mathf.Approximately(start + index/Pipeline.GetEditor().TargetFramerate, end))) {
-                                float tCurrent = start + index/Pipeline.GetEditor().TargetFramerate;
-                                float tNext = start + (index+1)/Pipeline.GetEditor().TargetFramerate;
-                                index +=1;
+                            while (Pipeline.IsProcessing() && (start + index / Pipeline.GetEditor().TargetFramerate < end || Mathf.Approximately(start + index / Pipeline.GetEditor().TargetFramerate, end)))
+                            {
+                                float tCurrent = start + index / Pipeline.GetEditor().TargetFramerate;
+                                float tNext = start + (index + 1) / Pipeline.GetEditor().TargetFramerate;
+                                index += 1;
 
                                 ControllerMANNSetup.Export(this, X, Y, tCurrent, tNext);
 
@@ -218,7 +270,8 @@ namespace DeepPhase {
                                 WriteSequenceInfo(Sequence, tCurrent, Pipeline.GetEditor().Mirror, asset);
 
                                 Samples += 1;
-                                if(Utility.GetElapsedTime(Timestamp) >= 0.1f) {
+                                if (Utility.GetElapsedTime(Timestamp) >= 0.1f)
+                                {
                                     Progress = end == 0f ? 1f : (tCurrent / end);
                                     SamplesPerSecond = Samples / (float)Utility.GetElapsedTime(Timestamp);
                                     Samples = 0;
@@ -232,26 +285,34 @@ namespace DeepPhase {
             }
         }
 
-        public override void Callback() {
-            if(Mode == MODE.ProcessAssets) {
+        public override void Callback()
+        {
+            if (Mode == MODE.ProcessAssets)
+            {
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
                 Resources.UnloadUnusedAssets();
             }
-            if(Mode == MODE.ExportController) {
+            if (Mode == MODE.ExportController)
+            {
                 Resources.UnloadUnusedAssets();
             }
-            if(Mode == MODE.ExportControllerLMP) {
+            if (Mode == MODE.ExportControllerLMP)
+            {
                 Resources.UnloadUnusedAssets();
             }
-            if(Mode == MODE.ExportControllerMANN) {
+            if (Mode == MODE.ExportControllerMANN)
+            {
                 Resources.UnloadUnusedAssets();
             }
         }
 
-        public override void Finish() {
-            if(Mode == MODE.ProcessAssets) {
-                for(int i=0; i<Pipeline.GetEditor().Assets.Count; i++) {
+        public override void Finish()
+        {
+            if (Mode == MODE.ProcessAssets)
+            {
+                for (int i = 0; i < Pipeline.GetEditor().Assets.Count; i++)
+                {
                     //MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).ResetSequences();
                     MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).Export = false;
                 }
@@ -260,44 +321,58 @@ namespace DeepPhase {
 
                 // Idle to Walk
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 74);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 125);
 
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 378);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 132);
 
-                for(int i=0; i<Pipeline.GetEditor().Assets.Count; i++) {
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 124);
+
+                for (int i = 0; i < Pipeline.GetEditor().Assets.Count; i++)
+                {
                     MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).MarkDirty(true, false);
                 }
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
                 Resources.UnloadUnusedAssets();
             }
-            if(Mode == MODE.ExportController) {                
+            if (Mode == MODE.ExportController)
+            {
                 S.Close();
                 X.Finish();
                 Y.Finish();
             }
-            if(Mode == MODE.ExportControllerLMP) {                
+            if (Mode == MODE.ExportControllerLMP)
+            {
                 S.Close();
                 X.Finish();
                 Y.Finish();
             }
-            if(Mode == MODE.ExportControllerMANN) {                
+            if (Mode == MODE.ExportControllerMANN)
+            {
                 S.Close();
                 X.Finish();
                 Y.Finish();
             }
         }
 
-        private void ProcessAssets(MotionAsset asset) {
+        private void ProcessAssets(MotionAsset asset)
+        {
             asset.RemoveAllModules();
-            
+
             asset.MirrorAxis = Axis.ZPositive;
             asset.Model = "AnzuBaby_RIG_DME_0005a_BINARY";
             asset.Scale = 1f;
             asset.Source.FindBone("AnzB:Head").Alignment = new Vector3(0f, 0f, 0f);
             asset.Source.FindBone("AnzB:LeftShoulder").Alignment = new Vector3(0f, 0f, 0f);
             asset.Source.FindBone("AnzB:RightShoulder").Alignment = new Vector3(0f, 0f, 0f);
+            asset.FootContactReferenceIdx = asset.Source.FindBone("AnzB:LeftFootIndex4").Index;
+
+            if (asset.name.Contains("Jump"))
+            {
+                asset.AddJumpTarget = true;
+            }
 
             {
                 RootModule module = asset.HasModule<RootModule>() ? asset.GetModule<RootModule>() : asset.AddModule<RootModule>();
@@ -308,12 +383,12 @@ namespace DeepPhase {
             {
                 ContactModule module = asset.HasModule<ContactModule>() ? asset.GetModule<ContactModule>() : asset.AddModule<ContactModule>();
                 module.Clear();
-                module.AddSensor("AnzB:Hips", Vector3.zero, Vector3.zero, 0.2f*Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
-                module.AddSensor("AnzB:Neck", Vector3.zero, Vector3.zero, 0.25f*Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
-                module.AddSensor("AnzB:LeftHand", Vector3.zero, Vector3.zero, 1f/30f*Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
-                module.AddSensor("AnzB:RightHand", Vector3.zero, Vector3.zero, 1f/30f*Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
-                module.AddSensor("AnzB:LeftFootIndex4", Vector3.zero, Vector3.zero, 1f/30f*Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
-                module.AddSensor("AnzB:RightFootIndex4", Vector3.zero, Vector3.zero, 1f/30f*Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
+                module.AddSensor("AnzB:Hips", Vector3.zero, Vector3.zero, 0.2f * Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
+                module.AddSensor("AnzB:Neck", Vector3.zero, Vector3.zero, 0.25f * Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
+                module.AddSensor("AnzB:LeftHand", Vector3.zero, Vector3.zero, 1f / 30f * Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
+                module.AddSensor("AnzB:RightHand", Vector3.zero, Vector3.zero, 1f / 30f * Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
+                module.AddSensor("AnzB:LeftFootIndex4", Vector3.zero, Vector3.zero, 1f / 30f * Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
+                module.AddSensor("AnzB:RightFootIndex4", Vector3.zero, Vector3.zero, 1f / 30f * Vector3.one, 1f, LayerMask.GetMask("Ground"), ContactModule.ContactType.Translational, ContactModule.ColliderType.Sphere);
                 module.CaptureContacts(Pipeline.GetEditor());
             }
 
@@ -329,23 +404,27 @@ namespace DeepPhase {
                 float[] weights = new float[asset.Frames.Length];
                 float[] rootMotion = new float[asset.Frames.Length];
                 float[] bodyMotion = new float[asset.Frames.Length];
-                for(int f=0; f<asset.Frames.Length; f++) {
+                for (int f = 0; f < asset.Frames.Length; f++)
+                {
                     rootMotion[f] = root.GetRootVelocity(asset.Frames[f].Timestamp, false).magnitude;
                     bodyMotion[f] = asset.Frames[f].GetBoneVelocities(Pipeline.GetEditor().GetSession().GetBoneMapping(), false).Magnitudes().Mean();
                 }
                 {
                     float[] copy = rootMotion.Copy();
-                    for(int i=0; i<copy.Length; i++) {
-                        rootMotion[i] = copy.GatherByWindow(i, Mathf.RoundToInt(0.5f*root.Window*asset.Framerate)).Gaussian();
+                    for (int i = 0; i < copy.Length; i++)
+                    {
+                        rootMotion[i] = copy.GatherByWindow(i, Mathf.RoundToInt(0.5f * root.Window * asset.Framerate)).Gaussian();
                     }
                 }
                 {
                     float[] copy = bodyMotion.Copy();
-                    for(int i=0; i<copy.Length; i++) {
-                        bodyMotion[i] = copy.GatherByWindow(i, Mathf.RoundToInt(0.5f*root.Window*asset.Framerate)).Gaussian();
+                    for (int i = 0; i < copy.Length; i++)
+                    {
+                        bodyMotion[i] = copy.GatherByWindow(i, Mathf.RoundToInt(0.5f * root.Window * asset.Framerate)).Gaussian();
                     }
                 }
-                for(int f=0; f<asset.Frames.Length; f++) {
+                for (int f = 0; f < asset.Frames.Length; f++)
+                {
                     float motion = Mathf.Min(rootMotion[f], bodyMotion[f]);
                     float movement = root.GetRootLength(asset.Frames[f].Timestamp, false);
                     idle.StandardValues[f] = motion < threshold ? 1f : 0f;
@@ -358,23 +437,26 @@ namespace DeepPhase {
                 }
                 {
                     float[] copy = idle.StandardValues.Copy();
-                    for(int i=0; i<copy.Length; i++) {
-                        idle.StandardValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f*root.Window*asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
-                        idle.MirroredValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f*root.Window*asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
+                    for (int i = 0; i < copy.Length; i++)
+                    {
+                        idle.StandardValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f * root.Window * asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
+                        idle.MirroredValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f * root.Window * asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
                     }
                 }
                 {
                     float[] copy = move.StandardValues.Copy();
-                    for(int i=0; i<copy.Length; i++) {
-                        move.StandardValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f*root.Window*asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
-                        move.MirroredValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f*root.Window*asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
+                    for (int i = 0; i < copy.Length; i++)
+                    {
+                        move.StandardValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f * root.Window * asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
+                        move.MirroredValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f * root.Window * asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
                     }
                 }
                 {
                     float[] copy = speed.StandardValues.Copy();
                     float[] grads = copy.Gradients(asset.GetDeltaTime());
-                    for(int i=0; i<speed.StandardValues.Length; i++) {
-                        int padding = Mathf.RoundToInt(weights[i] * 0.5f*root.Window*asset.Framerate);
+                    for (int i = 0; i < speed.StandardValues.Length; i++)
+                    {
+                        int padding = Mathf.RoundToInt(weights[i] * 0.5f * root.Window * asset.Framerate);
                         float power = Mathf.Abs(grads.GatherByWindow(i, padding).Gaussian());
                         speed.StandardValues[i] = copy.GatherByWindow(i, padding).Gaussian(power);
                         speed.StandardValues[i] = Mathf.Lerp(speed.StandardValues[i], 0f, idle.StandardValues[i]);
@@ -428,31 +510,35 @@ namespace DeepPhase {
             asset.MarkDirty(true, false);
         }
 
-        private class ControllerSetup {
-            public static void Export(DinoPipeline setup, AssetPipeline.Data X, AssetPipeline.Data Y, float tCurrent, float tNext) {
+        private class ControllerSetup
+        {
+            public static void Export(DinoPipeline setup, AssetPipeline.Data X, AssetPipeline.Data Y, float tCurrent, float tNext)
+            {
                 Container current = new Container(setup, tCurrent);
                 Container next = new Container(setup, tNext);
 
-                string[] styles = new string[]{"Idle", "Move", "Speed"};
+                string[] styles = new string[] { "Idle", "Move", "Speed" };
                 // string[] styles = new string[]{"Speed"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
-                string[] contacts = new string[]{"AnzB:LeftFootIndex4", "AnzB:RightFootIndex4"};
+                string[] contacts = new string[] { "AnzB:LeftFootIndex4", "AnzB:RightFootIndex4" };
 
                 //Input
                 //Control
-                for(int k=0; k<current.TimeSeries.Samples.Length; k++) {
-                    X.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(current.Root), "TrajectoryPosition"+(k+1));
-                    X.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(current.Root), "TrajectoryDirection"+(k+1));
-                    X.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(current.Root), "TrajectoryVelocity"+(k+1));
-                    X.Feed(next.StyleSeries.GetValues(k, styles), "Actions"+(k+1)+"-");
+                for (int k = 0; k < current.TimeSeries.Samples.Length; k++)
+                {
+                    X.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(current.Root), "TrajectoryPosition" + (k + 1));
+                    X.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(current.Root), "TrajectoryDirection" + (k + 1));
+                    X.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(current.Root), "TrajectoryVelocity" + (k + 1));
+                    X.Feed(next.StyleSeries.GetValues(k, styles), "Actions" + (k + 1) + "-");
                 }
 
                 //Auto-Regressive Posture
-                for(int k=0; k<current.ActorPosture.Length; k++) {
-                    X.Feed(current.ActorPosture[k].GetPosition().PositionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Position");
-                    X.Feed(current.ActorPosture[k].GetForward().DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Forward");
-                    X.Feed(current.ActorPosture[k].GetUp().DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Up");
-                    X.Feed(current.ActorVelocities[k].DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Velocity");
+                for (int k = 0; k < current.ActorPosture.Length; k++)
+                {
+                    X.Feed(current.ActorPosture[k].GetPosition().PositionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Position");
+                    X.Feed(current.ActorPosture[k].GetForward().DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Forward");
+                    X.Feed(current.ActorPosture[k].GetUp().DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Up");
+                    X.Feed(current.ActorVelocities[k].DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Velocity");
                 }
 
                 //Gating Variables
@@ -466,19 +552,21 @@ namespace DeepPhase {
                 Y.Feed(next.StyleSeries.GetValues(next.TimeSeries.Pivot, styles), "RootActions");
 
                 //Control
-                for(int k=next.TimeSeries.Pivot+1; k<next.TimeSeries.Samples.Length; k++) {
-                    Y.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(next.Root), "TrajectoryPosition"+(k+1));
-                    Y.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(next.Root), "TrajectoryDirection"+(k+1));
-                    Y.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(next.Root), "TrajectoryVelocity"+(k+1));
-                    Y.Feed(next.StyleSeries.GetValues(k, styles), "Actions"+(k+1)+"-");
+                for (int k = next.TimeSeries.Pivot + 1; k < next.TimeSeries.Samples.Length; k++)
+                {
+                    Y.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(next.Root), "TrajectoryPosition" + (k + 1));
+                    Y.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(next.Root), "TrajectoryDirection" + (k + 1));
+                    Y.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(next.Root), "TrajectoryVelocity" + (k + 1));
+                    Y.Feed(next.StyleSeries.GetValues(k, styles), "Actions" + (k + 1) + "-");
                 }
 
                 //Auto-Regressive Posture
-                for(int k=0; k<next.ActorPosture.Length; k++) {
-                    Y.Feed(next.ActorPosture[k].GetPosition().PositionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Position");
-                    Y.Feed(next.ActorPosture[k].GetForward().DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Forward");
-                    Y.Feed(next.ActorPosture[k].GetUp().DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Up");
-                    Y.Feed(next.ActorVelocities[k].DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Velocity");
+                for (int k = 0; k < next.ActorPosture.Length; k++)
+                {
+                    Y.Feed(next.ActorPosture[k].GetPosition().PositionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Position");
+                    Y.Feed(next.ActorPosture[k].GetForward().DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Forward");
+                    Y.Feed(next.ActorPosture[k].GetUp().DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Up");
+                    Y.Feed(next.ActorVelocities[k].DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Velocity");
                 }
 
                 //Contacts
@@ -488,7 +576,8 @@ namespace DeepPhase {
                 Y.Feed(next.PhaseSeries.GetUpdate(), "PhaseUpdate-");
             }
 
-            private class Container {
+            private class Container
+            {
                 public MotionAsset Asset;
                 public Frame Frame;
                 public Actor Actor;
@@ -504,7 +593,8 @@ namespace DeepPhase {
                 public Matrix4x4[] ActorPosture;
                 public Vector3[] ActorVelocities;
 
-                public Container(DinoPipeline setup, float timestamp) {
+                public Container(DinoPipeline setup, float timestamp)
+                {
                     MotionEditor editor = setup.Pipeline.GetEditor();
                     editor.LoadFrame(timestamp);
                     Asset = editor.GetSession().Asset;
@@ -514,7 +604,7 @@ namespace DeepPhase {
                     RootSeries = Asset.GetModule<RootModule>().ExtractSeries(TimeSeries, timestamp, editor.Mirror) as RootModule.Series;
                     StyleSeries = Asset.GetModule<StyleModule>().ExtractSeries(TimeSeries, timestamp, editor.Mirror) as StyleModule.Series;
                     ContactSeries = Asset.GetModule<ContactModule>().ExtractSeries(TimeSeries, timestamp, editor.Mirror) as ContactModule.Series;
-                    PhaseSeries = Asset.GetModule<DeepPhaseModule>(setup.Channels+"Channels").ExtractSeries(TimeSeries, timestamp, editor.Mirror) as DeepPhaseModule.Series;
+                    PhaseSeries = Asset.GetModule<DeepPhaseModule>(setup.Channels + "Channels").ExtractSeries(TimeSeries, timestamp, editor.Mirror) as DeepPhaseModule.Series;
 
                     Root = editor.GetSession().GetActor().transform.GetWorldMatrix();
                     ActorPosture = editor.GetSession().GetActor().GetBoneTransformations();
@@ -524,44 +614,51 @@ namespace DeepPhase {
         }
 
 
-        private class ControllerLMPSetup {
-            public static void Export(DinoPipeline setup, AssetPipeline.Data X, AssetPipeline.Data Y, float tCurrent, float tNext) {
+        private class ControllerLMPSetup
+        {
+            public static void Export(DinoPipeline setup, AssetPipeline.Data X, AssetPipeline.Data Y, float tCurrent, float tNext)
+            {
                 Container current = new Container(setup, tCurrent);
                 Container next = new Container(setup, tNext);
 
-                string[] styles = new string[]{"Idle", "Move", "Speed"};
+                string[] styles = new string[] { "Idle", "Move", "Speed" };
                 // string[] styles = new string[]{"Speed"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
-                string[] contacts = new string[]{"AnzB:LeftFootIndex4", "AnzB:RightFootIndex4"};
+                string[] contacts = new string[] { "AnzB:LeftFootIndex4", "AnzB:RightFootIndex4" };
 
                 //Input
                 //Control
-                for(int k=0; k<current.TimeSeries.Samples.Length; k++) {
-                    X.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(current.Root), "TrajectoryPosition"+(k+1));
-                    X.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(current.Root), "TrajectoryDirection"+(k+1));
-                    X.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(current.Root), "TrajectoryVelocity"+(k+1));
-                    X.Feed(next.StyleSeries.GetValues(k, styles), "Actions"+(k+1)+"-");
+                for (int k = 0; k < current.TimeSeries.Samples.Length; k++)
+                {
+                    X.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(current.Root), "TrajectoryPosition" + (k + 1));
+                    X.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(current.Root), "TrajectoryDirection" + (k + 1));
+                    X.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(current.Root), "TrajectoryVelocity" + (k + 1));
+                    X.Feed(next.StyleSeries.GetValues(k, styles), "Actions" + (k + 1) + "-");
                 }
 
                 //Auto-Regressive Posture
-                for(int k=0; k<current.ActorPosture.Length; k++) {
-                    X.Feed(current.ActorPosture[k].GetPosition().PositionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Position");
-                    X.Feed(current.ActorPosture[k].GetForward().DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Forward");
-                    X.Feed(current.ActorPosture[k].GetUp().DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Up");
-                    X.Feed(current.ActorVelocities[k].DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Velocity");
+                for (int k = 0; k < current.ActorPosture.Length; k++)
+                {
+                    X.Feed(current.ActorPosture[k].GetPosition().PositionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Position");
+                    X.Feed(current.ActorPosture[k].GetForward().DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Forward");
+                    X.Feed(current.ActorPosture[k].GetUp().DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Up");
+                    X.Feed(current.ActorVelocities[k].DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Velocity");
                 }
 
                 //Gating Variables
                 {
                     int index = 0;
-                    for(int k=0; k<current.TimeSeries.Samples.Length; k++) {
-                        for(int b=0; b<current.PhaseSeries.Bones.Length; b++) {
-                            if(contacts.Contains(current.PhaseSeries.Bones[b])) {
+                    for (int k = 0; k < current.TimeSeries.Samples.Length; k++)
+                    {
+                        for (int b = 0; b < current.PhaseSeries.Bones.Length; b++)
+                        {
+                            if (contacts.Contains(current.PhaseSeries.Bones[b]))
+                            {
                                 Vector2 phase = current.PhaseSeries.Amplitudes[k][b] * Utility.PhaseVector(current.PhaseSeries.Phases[k][b]);
                                 index += 1;
-                                X.Feed(phase.x, "Gating"+index+"-Key"+(k+1)+"-Bone"+current.PhaseSeries.Bones[b]);
+                                X.Feed(phase.x, "Gating" + index + "-Key" + (k + 1) + "-Bone" + current.PhaseSeries.Bones[b]);
                                 index += 1;
-                                X.Feed(phase.y, "Gating"+index+"-Key"+(k+1)+"-Bone"+current.PhaseSeries.Bones[b]);
+                                X.Feed(phase.y, "Gating" + index + "-Key" + (k + 1) + "-Bone" + current.PhaseSeries.Bones[b]);
                             }
                         }
                     }
@@ -575,36 +672,42 @@ namespace DeepPhase {
                 Y.Feed(next.StyleSeries.GetValues(next.TimeSeries.Pivot, styles), "RootActions");
 
                 //Control
-                for(int k=next.TimeSeries.Pivot+1; k<next.TimeSeries.Samples.Length; k++) {
-                    Y.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(next.Root), "TrajectoryPosition"+(k+1));
-                    Y.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(next.Root), "TrajectoryDirection"+(k+1));
-                    Y.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(next.Root), "TrajectoryVelocity"+(k+1));
-                    Y.Feed(next.StyleSeries.GetValues(k, styles), "Actions"+(k+1)+"-");
+                for (int k = next.TimeSeries.Pivot + 1; k < next.TimeSeries.Samples.Length; k++)
+                {
+                    Y.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(next.Root), "TrajectoryPosition" + (k + 1));
+                    Y.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(next.Root), "TrajectoryDirection" + (k + 1));
+                    Y.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(next.Root), "TrajectoryVelocity" + (k + 1));
+                    Y.Feed(next.StyleSeries.GetValues(k, styles), "Actions" + (k + 1) + "-");
                 }
 
                 //Auto-Regressive Posture
-                for(int k=0; k<next.ActorPosture.Length; k++) {
-                    Y.Feed(next.ActorPosture[k].GetPosition().PositionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Position");
-                    Y.Feed(next.ActorPosture[k].GetForward().DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Forward");
-                    Y.Feed(next.ActorPosture[k].GetUp().DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Up");
-                    Y.Feed(next.ActorVelocities[k].DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Velocity");
+                for (int k = 0; k < next.ActorPosture.Length; k++)
+                {
+                    Y.Feed(next.ActorPosture[k].GetPosition().PositionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Position");
+                    Y.Feed(next.ActorPosture[k].GetForward().DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Forward");
+                    Y.Feed(next.ActorPosture[k].GetUp().DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Up");
+                    Y.Feed(next.ActorVelocities[k].DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Velocity");
                 }
 
                 //Contacts
                 Y.Feed(next.ContactSeries.GetContacts(next.TimeSeries.Pivot, contacts), "Contacts-");
 
                 //Phase Update
-                for(int k=next.TimeSeries.Pivot; k<next.TimeSeries.Samples.Length; k++) {
-                    for(int b=0; b<next.PhaseSeries.Bones.Length; b++) {
-                        if(contacts.Contains(next.PhaseSeries.Bones[b])) {
-                            Y.Feed(next.PhaseSeries.Amplitudes[k][b] * Utility.PhaseVector(Utility.SignedPhaseUpdate(current.PhaseSeries.Phases[k][b], next.PhaseSeries.Phases[k][b])), "PhaseUpdate-"+(k+1)+"-"+(b+1));
-                            Y.Feed(next.PhaseSeries.Amplitudes[k][b] * Utility.PhaseVector(next.PhaseSeries.Phases[k][b]), "PhaseState-"+(k+1)+"-"+(b+1));
+                for (int k = next.TimeSeries.Pivot; k < next.TimeSeries.Samples.Length; k++)
+                {
+                    for (int b = 0; b < next.PhaseSeries.Bones.Length; b++)
+                    {
+                        if (contacts.Contains(next.PhaseSeries.Bones[b]))
+                        {
+                            Y.Feed(next.PhaseSeries.Amplitudes[k][b] * Utility.PhaseVector(Utility.SignedPhaseUpdate(current.PhaseSeries.Phases[k][b], next.PhaseSeries.Phases[k][b])), "PhaseUpdate-" + (k + 1) + "-" + (b + 1));
+                            Y.Feed(next.PhaseSeries.Amplitudes[k][b] * Utility.PhaseVector(next.PhaseSeries.Phases[k][b]), "PhaseState-" + (k + 1) + "-" + (b + 1));
                         }
                     }
                 }
             }
 
-            private class Container {
+            private class Container
+            {
                 public MotionAsset Asset;
                 public Frame Frame;
                 public Actor Actor;
@@ -620,7 +723,8 @@ namespace DeepPhase {
                 public Matrix4x4[] ActorPosture;
                 public Vector3[] ActorVelocities;
 
-                public Container(DinoPipeline setup, float timestamp) {
+                public Container(DinoPipeline setup, float timestamp)
+                {
                     MotionEditor editor = setup.Pipeline.GetEditor();
                     editor.LoadFrame(timestamp);
                     Asset = editor.GetSession().Asset;
@@ -638,41 +742,46 @@ namespace DeepPhase {
                 }
             }
         }
-        
-        private class ControllerMANNSetup {
-            public static void Export(DinoPipeline setup, AssetPipeline.Data X, AssetPipeline.Data Y, float tCurrent, float tNext) {
+
+        private class ControllerMANNSetup
+        {
+            public static void Export(DinoPipeline setup, AssetPipeline.Data X, AssetPipeline.Data Y, float tCurrent, float tNext)
+            {
                 Container current = new Container(setup, tCurrent);
                 Container next = new Container(setup, tNext);
 
-                string[] styles = new string[]{"Idle", "Move", "Speed"};
+                string[] styles = new string[] { "Idle", "Move", "Speed" };
                 // string[] gating = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
-                string[] gating = new string[]{"AnzB:LeftFootIndex4", "AnzB:RightFootIndex4"};
-                string[] contacts = new string[]{"AnzB:LeftFootIndex4", "AnzB:RightFootIndex4"};
+                string[] gating = new string[] { "AnzB:LeftFootIndex4", "AnzB:RightFootIndex4" };
+                string[] contacts = new string[] { "AnzB:LeftFootIndex4", "AnzB:RightFootIndex4" };
 
                 //Input
                 //Control
-                for(int k=0; k<current.TimeSeries.Samples.Length; k++) {
-                    X.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(current.Root), "TrajectoryPosition"+(k+1));
-                    X.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(current.Root), "TrajectoryDirection"+(k+1));
-                    X.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(current.Root), "TrajectoryVelocity"+(k+1));
-                    X.Feed(next.StyleSeries.GetValues(k, styles), "Actions"+(k+1)+"-");
+                for (int k = 0; k < current.TimeSeries.Samples.Length; k++)
+                {
+                    X.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(current.Root), "TrajectoryPosition" + (k + 1));
+                    X.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(current.Root), "TrajectoryDirection" + (k + 1));
+                    X.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(current.Root), "TrajectoryVelocity" + (k + 1));
+                    X.Feed(next.StyleSeries.GetValues(k, styles), "Actions" + (k + 1) + "-");
                 }
 
                 //Auto-Regressive Posture
-                for(int k=0; k<current.ActorPosture.Length; k++) {
-                    X.Feed(current.ActorPosture[k].GetPosition().PositionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Position");
-                    X.Feed(current.ActorPosture[k].GetForward().DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Forward");
-                    X.Feed(current.ActorPosture[k].GetUp().DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Up");
-                    X.Feed(current.ActorVelocities[k].DirectionTo(current.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Velocity");
+                for (int k = 0; k < current.ActorPosture.Length; k++)
+                {
+                    X.Feed(current.ActorPosture[k].GetPosition().PositionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Position");
+                    X.Feed(current.ActorPosture[k].GetForward().DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Forward");
+                    X.Feed(current.ActorPosture[k].GetUp().DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Up");
+                    X.Feed(current.ActorVelocities[k].DirectionTo(current.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Velocity");
                 }
 
                 //Gating Variables
                 {
                     int[] indices = setup.Pipeline.GetEditor().GetSession().GetActor().GetBoneIndices(gating);
-                    for(int i=0; i<gating.Length; i++) {
+                    for (int i = 0; i < gating.Length; i++)
+                    {
                         Vector3 velocity = current.ActorVelocities[indices[i]].DirectionTo(current.Root);
-                        X.Feed(velocity, "GatingVelocity"+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[indices[i]].GetName());
+                        X.Feed(velocity, "GatingVelocity" + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[indices[i]].GetName());
                     }
                 }
 
@@ -684,26 +793,29 @@ namespace DeepPhase {
                 Y.Feed(next.StyleSeries.GetValues(next.TimeSeries.Pivot, styles), "RootActions");
 
                 //Control
-                for(int k=next.TimeSeries.Pivot+1; k<next.TimeSeries.Samples.Length; k++) {
-                    Y.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(next.Root), "TrajectoryPosition"+(k+1));
-                    Y.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(next.Root), "TrajectoryDirection"+(k+1));
-                    Y.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(next.Root), "TrajectoryVelocity"+(k+1));
-                    Y.Feed(next.StyleSeries.GetValues(k, styles), "Actions"+(k+1)+"-");
+                for (int k = next.TimeSeries.Pivot + 1; k < next.TimeSeries.Samples.Length; k++)
+                {
+                    Y.FeedXZ(next.RootSeries.GetPosition(k).PositionTo(next.Root), "TrajectoryPosition" + (k + 1));
+                    Y.FeedXZ(next.RootSeries.GetDirection(k).DirectionTo(next.Root), "TrajectoryDirection" + (k + 1));
+                    Y.FeedXZ(next.RootSeries.GetVelocity(k).DirectionTo(next.Root), "TrajectoryVelocity" + (k + 1));
+                    Y.Feed(next.StyleSeries.GetValues(k, styles), "Actions" + (k + 1) + "-");
                 }
 
                 //Auto-Regressive Posture
-                for(int k=0; k<next.ActorPosture.Length; k++) {
-                    Y.Feed(next.ActorPosture[k].GetPosition().PositionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Position");
-                    Y.Feed(next.ActorPosture[k].GetForward().DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Forward");
-                    Y.Feed(next.ActorPosture[k].GetUp().DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Up");
-                    Y.Feed(next.ActorVelocities[k].DirectionTo(next.Root), "Bone"+(k+1)+setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName()+"Velocity");
+                for (int k = 0; k < next.ActorPosture.Length; k++)
+                {
+                    Y.Feed(next.ActorPosture[k].GetPosition().PositionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Position");
+                    Y.Feed(next.ActorPosture[k].GetForward().DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Forward");
+                    Y.Feed(next.ActorPosture[k].GetUp().DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Up");
+                    Y.Feed(next.ActorVelocities[k].DirectionTo(next.Root), "Bone" + (k + 1) + setup.Pipeline.GetEditor().GetSession().GetActor().Bones[k].GetName() + "Velocity");
                 }
 
                 //Contacts
                 Y.Feed(next.ContactSeries.GetContacts(next.TimeSeries.Pivot, contacts), "Contacts-");
             }
 
-            private class Container {
+            private class Container
+            {
                 public MotionAsset Asset;
                 public Frame Frame;
                 public Actor Actor;
@@ -718,7 +830,8 @@ namespace DeepPhase {
                 public Matrix4x4[] ActorPosture;
                 public Vector3[] ActorVelocities;
 
-                public Container(DinoPipeline setup, float timestamp) {
+                public Container(DinoPipeline setup, float timestamp)
+                {
                     MotionEditor editor = setup.Pipeline.GetEditor();
                     editor.LoadFrame(timestamp);
                     Asset = editor.GetSession().Asset;
@@ -749,82 +862,82 @@ namespace DeepPhase {
 
 
 
-            // {
-            //     //TODO: replace like in soccer pipeline
-            //     StyleModule module = asset.HasModule<StyleModule>() ? asset.GetModule<StyleModule>() : asset.AddModule<StyleModule>();
-            //     RootModule root = asset.GetModule<RootModule>();
-            //     ContactModule contact = asset.GetModule<ContactModule>();
-            //     module.Clear();
-            //     StyleModule.StyleFunction idling = module.AddStyle("Idle");
-            //     StyleModule.StyleFunction moving = module.AddStyle("Move");
-            //     StyleModule.StyleFunction sitting = module.AddStyle("Sit");
-            //     StyleModule.StyleFunction resting = module.AddStyle("Rest");
-            //     StyleModule.StyleFunction standing = module.AddStyle("Stand");
-            //     StyleModule.StyleFunction jumping = module.AddStyle("Jump");
-            //     StyleModule.StyleFunction speed = module.AddStyle("Speed");
-            //     float[] timeWindow = asset.GetTimeWindow(Pipeline.GetEditor().PastWindow + Pipeline.GetEditor().FutureWindow, 1f);
-            //     float[] contactHeights = new float[asset.Frames.Length];
-            //     for(int i=0; i<asset.Frames.Length; i++) {
-            //         for(int j=0; j<contact.Sensors.Length; j++) {
-            //             contactHeights[i] += asset.Frames[i].GetBoneTransformation(contact.Sensors[j].Bone, false).GetPosition().y;
-            //         }
-            //         contactHeights[i] /= contact.Sensors.Length;
-            //     }
-            //     for(int f=0; f<asset.Frames.Length; f++) {
-            //         float weight = GetMovementWeight(asset.Frames[f].Timestamp, 0.5f);
-            //         idling.Values[f] = 1f - weight;
-            //         moving.Values[f] = weight;
-            //         float sit = GetContactsWeight(asset.Frames[f].Timestamp, 0.5f, contact, sitPatterns, 0f, 1f);
-            //         float rest = GetContactsWeight(asset.Frames[f].Timestamp, 0.5f, contact, restPatterns, 0f, 1f);
-            //         float stand = GetContactsWeight(asset.Frames[f].Timestamp, 0.5f, contact, standPatterns, 0f, 1f);
-            //         float jump = GetContactsWeight(asset.Frames[f].Timestamp, 0.5f, contact, jumpPatterns, 0.3f, 0.1f);
-            //         float[] actions = new float[]{sit, rest, stand, jump};
-            //         Utility.SoftMax(ref actions);
-            //         sitting.Values[f] = sit;
-            //         resting.Values[f] = rest;
-            //         standing.Values[f] = stand;
-            //         jumping.Values[f] = jump;
-            //         speed.Values[f] = root.GetRootLength(asset.Frames[f].Timestamp, false); //TODO: Divide by root window
-            //     }
+// {
+//     //TODO: replace like in soccer pipeline
+//     StyleModule module = asset.HasModule<StyleModule>() ? asset.GetModule<StyleModule>() : asset.AddModule<StyleModule>();
+//     RootModule root = asset.GetModule<RootModule>();
+//     ContactModule contact = asset.GetModule<ContactModule>();
+//     module.Clear();
+//     StyleModule.StyleFunction idling = module.AddStyle("Idle");
+//     StyleModule.StyleFunction moving = module.AddStyle("Move");
+//     StyleModule.StyleFunction sitting = module.AddStyle("Sit");
+//     StyleModule.StyleFunction resting = module.AddStyle("Rest");
+//     StyleModule.StyleFunction standing = module.AddStyle("Stand");
+//     StyleModule.StyleFunction jumping = module.AddStyle("Jump");
+//     StyleModule.StyleFunction speed = module.AddStyle("Speed");
+//     float[] timeWindow = asset.GetTimeWindow(Pipeline.GetEditor().PastWindow + Pipeline.GetEditor().FutureWindow, 1f);
+//     float[] contactHeights = new float[asset.Frames.Length];
+//     for(int i=0; i<asset.Frames.Length; i++) {
+//         for(int j=0; j<contact.Sensors.Length; j++) {
+//             contactHeights[i] += asset.Frames[i].GetBoneTransformation(contact.Sensors[j].Bone, false).GetPosition().y;
+//         }
+//         contactHeights[i] /= contact.Sensors.Length;
+//     }
+//     for(int f=0; f<asset.Frames.Length; f++) {
+//         float weight = GetMovementWeight(asset.Frames[f].Timestamp, 0.5f);
+//         idling.Values[f] = 1f - weight;
+//         moving.Values[f] = weight;
+//         float sit = GetContactsWeight(asset.Frames[f].Timestamp, 0.5f, contact, sitPatterns, 0f, 1f);
+//         float rest = GetContactsWeight(asset.Frames[f].Timestamp, 0.5f, contact, restPatterns, 0f, 1f);
+//         float stand = GetContactsWeight(asset.Frames[f].Timestamp, 0.5f, contact, standPatterns, 0f, 1f);
+//         float jump = GetContactsWeight(asset.Frames[f].Timestamp, 0.5f, contact, jumpPatterns, 0.3f, 0.1f);
+//         float[] actions = new float[]{sit, rest, stand, jump};
+//         Utility.SoftMax(ref actions);
+//         sitting.Values[f] = sit;
+//         resting.Values[f] = rest;
+//         standing.Values[f] = stand;
+//         jumping.Values[f] = jump;
+//         speed.Values[f] = root.GetRootLength(asset.Frames[f].Timestamp, false); //TODO: Divide by root window
+//     }
 
-            //     float GetMovementWeight(float timestamp, float threshold) {
-            //         float[] weights = new float[timeWindow.Length];
-            //         for(int j=0; j<timeWindow.Length; j++) {
-            //             weights[j] = Mathf.Max(
-            //                             root.GetRootVelocity(timestamp + timeWindow[j], false).magnitude,
-            //                             root.GetRootAngle(timestamp + timeWindow[j], false)
-            //                         ).Ratio(0f, threshold);
-            //         }
-                    
-            //         float[] gradients = new float[weights.Length-1];
-            //         for(int i=0; i<gradients.Length; i++) {
-            //             gradients[i] = (weights[i+1] - weights[i]) / (timeWindow[i+1] - timeWindow[i]);
-            //         }
+//     float GetMovementWeight(float timestamp, float threshold) {
+//         float[] weights = new float[timeWindow.Length];
+//         for(int j=0; j<timeWindow.Length; j++) {
+//             weights[j] = Mathf.Max(
+//                             root.GetRootVelocity(timestamp + timeWindow[j], false).magnitude,
+//                             root.GetRootAngle(timestamp + timeWindow[j], false)
+//                         ).Ratio(0f, threshold);
+//         }
 
-            //         return weights.Gaussian(Mathf.Abs(gradients.Gaussian())).SmoothStep(2f, 0.5f);
-            //     }
+//         float[] gradients = new float[weights.Length-1];
+//         for(int i=0; i<gradients.Length; i++) {
+//             gradients[i] = (weights[i+1] - weights[i]) / (timeWindow[i+1] - timeWindow[i]);
+//         }
 
-            //     float GetContactsWeight(float timestamp, float window, ContactModule module, List<float[]> patterns, float heightThreshold, float power) {
-            //         float ContactGaussian(float t) {
-            //             float[] weights = new float[timeWindow.Length];
-            //             for(int j=0; j<timeWindow.Length; j++) {
-            //                 bool match = false;
-            //                 for(int i=0; i<patterns.Count; i++) {
-            //                     float[] contacts = module.GetContacts(t + timeWindow[j], false);
-            //                     match = ArrayExtensions.Equal(contacts, patterns[i]).All(true);
-            //                     if(match) {
-            //                         break;
-            //                     }
-            //                 }
-            //                 if(match && heightThreshold != 0f && contactHeights[asset.GetFrame(t).Index-1] < heightThreshold) {
-            //                     match = false;
-            //                 }
-            //                 weights[j] = match ? 1f : 0f;
-            //             }
-            //             return weights.Gaussian();
-            //         }
-            //         float weight = ContactGaussian(timestamp);
-            //         weight = Mathf.Pow(weight, 1f-weight);
-            //         return Mathf.Pow(weight, power);
-            //     }
-            // }
+//         return weights.Gaussian(Mathf.Abs(gradients.Gaussian())).SmoothStep(2f, 0.5f);
+//     }
+
+//     float GetContactsWeight(float timestamp, float window, ContactModule module, List<float[]> patterns, float heightThreshold, float power) {
+//         float ContactGaussian(float t) {
+//             float[] weights = new float[timeWindow.Length];
+//             for(int j=0; j<timeWindow.Length; j++) {
+//                 bool match = false;
+//                 for(int i=0; i<patterns.Count; i++) {
+//                     float[] contacts = module.GetContacts(t + timeWindow[j], false);
+//                     match = ArrayExtensions.Equal(contacts, patterns[i]).All(true);
+//                     if(match) {
+//                         break;
+//                     }
+//                 }
+//                 if(match && heightThreshold != 0f && contactHeights[asset.GetFrame(t).Index-1] < heightThreshold) {
+//                     match = false;
+//                 }
+//                 weights[j] = match ? 1f : 0f;
+//             }
+//             return weights.Gaussian();
+//         }
+//         float weight = ContactGaussian(timestamp);
+//         weight = Mathf.Pow(weight, 1f-weight);
+//         return Mathf.Pow(weight, power);
+//     }
+// }
