@@ -203,11 +203,12 @@ namespace AI4Animation {
 				if(topology == TOPOLOGY.CenterOfGravity) {
 					position = frame.GetBoneTransformations(Mapping, mirrored).GetPositions().Mean(Actor.GetBoneLengths());
 				}
-				if(Ground == 0) {
-					position.y = 0f;
-				} else {
+				// if(Ground == 0) {
+				// 	position.y = 0f;
+				// } else {
 					position = Utility.ProjectGround(position, Ground);
-				}
+				// }
+				// Debug.Log($"POSITION y = {position.y}");
 				return position;
 			}
 		}

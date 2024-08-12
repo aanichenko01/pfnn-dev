@@ -398,16 +398,21 @@ namespace DeepPhase
 
                 RootModule root = asset.GetModule<RootModule>();
                 StyleModule.Function idle = module.AddFunction("Idle");
-                StyleModule.Function move = module.AddFunction("Move"); //left as move but will for now be trated as jump
+                StyleModule.Function move = module.AddFunction("Move");
                 StyleModule.Function speed = module.AddFunction("Speed");
+                StyleModule.Function jump = module.AddFunction("Jump");
                 float threshold = 0.1f;
+                float jumpThreshold = 0.2f;
                 float[] weights = new float[asset.Frames.Length];
                 float[] rootMotion = new float[asset.Frames.Length];
                 float[] bodyMotion = new float[asset.Frames.Length];
+                float[] rootMotionY = new float[asset.Frames.Length];
                 for (int f = 0; f < asset.Frames.Length; f++)
                 {
                     rootMotion[f] = root.GetRootVelocity(asset.Frames[f].Timestamp, false).magnitude;
                     bodyMotion[f] = asset.Frames[f].GetBoneVelocities(Pipeline.GetEditor().GetSession().GetBoneMapping(), false).Magnitudes().Mean();
+                    rootMotionY[f] = asset.Frames[f].GetBoneVelocities(Pipeline.GetEditor().GetSession().GetBoneMapping(), false).ToArrayY().Mean();
+
                 }
                 {
                     float[] copy = rootMotion.Copy();
@@ -427,12 +432,16 @@ namespace DeepPhase
                 {
                     float motion = Mathf.Min(rootMotion[f], bodyMotion[f]);
                     float movement = root.GetRootLength(asset.Frames[f].Timestamp, false);
+                    float jumpMotion = Mathf.Abs(rootMotionY[f]);
+                    Debug.Log($"Frame={f},jumpMotion= {jumpMotion}");
                     idle.StandardValues[f] = motion < threshold ? 1f : 0f;
                     idle.MirroredValues[f] = motion < threshold ? 1f : 0f;
                     move.StandardValues[f] = 1f - idle.StandardValues[f];
                     move.MirroredValues[f] = 1f - idle.StandardValues[f];
                     speed.StandardValues[f] = movement;
                     speed.MirroredValues[f] = movement;
+                    jump.StandardValues[f] = jumpMotion > jumpThreshold ? 1f : 0f;
+                    jump.MirroredValues[f] = jumpMotion > jumpThreshold ? 1f : 0f;
                     weights[f] = Mathf.Sqrt(Mathf.Clamp(motion, 0f, threshold).Normalize(0f, threshold, 0f, 1f));
                 }
                 {
@@ -465,6 +474,15 @@ namespace DeepPhase
                         speed.MirroredValues[i] = Mathf.Lerp(speed.MirroredValues[i], 0f, idle.MirroredValues[i]);
                     }
                 }
+                {
+                    float[] copy = jump.StandardValues.Copy();
+                    for (int i = 0; i < copy.Length; i++)
+                    {
+                        jump.StandardValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f * root.Window * asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
+                        jump.MirroredValues[i] = copy.GatherByWindow(i, Mathf.RoundToInt(weights[i] * 0.5f * root.Window * asset.Framerate)).Gaussian().SmoothStep(2f, 0.5f);
+                    }
+                }
+
             }
 
             // {
