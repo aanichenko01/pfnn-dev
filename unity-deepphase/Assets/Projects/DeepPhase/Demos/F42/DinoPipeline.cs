@@ -318,32 +318,36 @@ namespace DeepPhase
                 }
 
                 // TODO
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 74);
 
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 52);
-
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 58);
-
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).SetSequence(0, 1, 50);
-
-                // Idle to Walk
+                // Individual jump and idle clips //////////////////////////////////////////////////////
                 // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 437);
-
-                // BASE JUMP SEQ
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 125);
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 74);
 
                 // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 132);
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 52);
 
                 // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 124);
-                // BASE JUMP SEQ
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 58);
+
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).Export = true;
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).SetSequence(0, 1, 50);
+                // Individual jump and idle clips //////////////////////////////////////////////////////
+
+                // Idle to Walk //////////////////////////////////////////////////////////////////////
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 437);
+                // Idle to Walk //////////////////////////////////////////////////////////////////////
+
+                // BASE JUMP SEQ /////////////////////////////////////////////////////////////////////
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 125);
+
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 132);
+
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 124);
+                // BASE JUMP SEQ /////////////////////////////////////////////////////////////////////
 
                 for (int i = 0; i < Pipeline.GetEditor().Assets.Count; i++)
                 {
