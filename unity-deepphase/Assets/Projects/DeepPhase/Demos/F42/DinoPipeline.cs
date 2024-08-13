@@ -317,17 +317,33 @@ namespace DeepPhase
                     MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).Export = false;
                 }
 
-                // TOD
-
-                // Idle to Walk
+                // TODO
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 125);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 74);
 
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 132);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 52);
 
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 124);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 58);
+
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).Export = true;
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).SetSequence(0, 1, 50);
+
+                // Idle to Walk
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 437);
+
+                // BASE JUMP SEQ
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 125);
+
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 132);
+
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
+                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 124);
+                // BASE JUMP SEQ
 
                 for (int i = 0; i < Pipeline.GetEditor().Assets.Count; i++)
                 {
@@ -369,7 +385,7 @@ namespace DeepPhase
             asset.Source.FindBone("AnzB:RightShoulder").Alignment = new Vector3(0f, 0f, 0f);
             asset.FootContactReferenceIdx = asset.Source.FindBone("AnzB:LeftFootIndex4").Index;
 
-            if (asset.name.Contains("Jump"))
+            if (asset.name.ToLower().Contains("jump".ToLower()))
             {
                 asset.AddJumpTarget = true;
             }
@@ -402,15 +418,17 @@ namespace DeepPhase
                 StyleModule.Function speed = module.AddFunction("Speed");
                 StyleModule.Function jump = module.AddFunction("Jump");
                 float threshold = 0.1f;
-                float jumpThreshold = 0.2f;
+                float jumpThreshold = 0.01f;
                 float[] weights = new float[asset.Frames.Length];
                 float[] rootMotion = new float[asset.Frames.Length];
                 float[] bodyMotion = new float[asset.Frames.Length];
                 float[] rootMotionY = new float[asset.Frames.Length];
+                float[] weightsJump = new float[asset.Frames.Length];
                 for (int f = 0; f < asset.Frames.Length; f++)
                 {
                     rootMotion[f] = root.GetRootVelocity(asset.Frames[f].Timestamp, false).magnitude;
                     bodyMotion[f] = asset.Frames[f].GetBoneVelocities(Pipeline.GetEditor().GetSession().GetBoneMapping(), false).Magnitudes().Mean();
+                    // rootMotionY[f] = asset.Frames[f].GetBoneVelocity("AnzB:LeftFootIndex4", false).y;
                     rootMotionY[f] = asset.Frames[f].GetBoneVelocities(Pipeline.GetEditor().GetSession().GetBoneMapping(), false).ToArrayY().Mean();
 
                 }
@@ -443,6 +461,7 @@ namespace DeepPhase
                     jump.StandardValues[f] = jumpMotion > jumpThreshold ? 1f : 0f;
                     jump.MirroredValues[f] = jumpMotion > jumpThreshold ? 1f : 0f;
                     weights[f] = Mathf.Sqrt(Mathf.Clamp(motion, 0f, threshold).Normalize(0f, threshold, 0f, 1f));
+                    weightsJump[f] = Mathf.Sqrt(Mathf.Clamp(jumpMotion, 0f, jumpThreshold).Normalize(0f, jumpThreshold, 0f, 1f));
                 }
                 {
                     float[] copy = idle.StandardValues.Copy();
@@ -466,6 +485,7 @@ namespace DeepPhase
                     for (int i = 0; i < speed.StandardValues.Length; i++)
                     {
                         int padding = Mathf.RoundToInt(weights[i] * 0.5f * root.Window * asset.Framerate);
+                        // Debug.Log($"Padding {padding}");
                         float power = Mathf.Abs(grads.GatherByWindow(i, padding).Gaussian());
                         speed.StandardValues[i] = copy.GatherByWindow(i, padding).Gaussian(power);
                         speed.StandardValues[i] = Mathf.Lerp(speed.StandardValues[i], 0f, idle.StandardValues[i]);
@@ -474,6 +494,20 @@ namespace DeepPhase
                         speed.MirroredValues[i] = Mathf.Lerp(speed.MirroredValues[i], 0f, idle.MirroredValues[i]);
                     }
                 }
+                // {
+                //     float[] copy = jump.StandardValues.Copy();
+                //     // TODO UPDATE PAD VALUE IF WEIRD DIPS
+                //     int pad = 5;
+                //     for (int i = 0; i < copy.Length; i++)
+                //     {
+                //         if (i > pad && i < copy.Length - pad)
+                //         {
+                //             if(copy[i - pad] == copy[i + pad]) {
+                //                 jump.StandardValues[i] = copy[i - pad];
+                //             }
+                //         }
+                //     }
+                // }
                 {
                     float[] copy = jump.StandardValues.Copy();
                     for (int i = 0; i < copy.Length; i++)
@@ -535,7 +569,9 @@ namespace DeepPhase
                 Container current = new Container(setup, tCurrent);
                 Container next = new Container(setup, tNext);
 
-                string[] styles = new string[] { "Idle", "Move", "Speed" };
+                string[] styles = new string[] { "Idle", "Move", "Speed", "Jump" };
+                // string[] styles = new string[] { "Idle", "Jump", "Speed" };
+
                 // string[] styles = new string[]{"Speed"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
                 string[] contacts = new string[] { "AnzB:LeftFootIndex4", "AnzB:RightFootIndex4" };
@@ -639,7 +675,7 @@ namespace DeepPhase
                 Container current = new Container(setup, tCurrent);
                 Container next = new Container(setup, tNext);
 
-                string[] styles = new string[] { "Idle", "Move", "Speed" };
+                string[] styles = new string[] { "Idle", "Move", "Speed", "Jump" };
                 // string[] styles = new string[]{"Speed"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
                 string[] contacts = new string[] { "AnzB:LeftFootIndex4", "AnzB:RightFootIndex4" };
@@ -768,7 +804,7 @@ namespace DeepPhase
                 Container current = new Container(setup, tCurrent);
                 Container next = new Container(setup, tNext);
 
-                string[] styles = new string[] { "Idle", "Move", "Speed" };
+                string[] styles = new string[] { "Idle", "Move", "Speed", "Jump" };
                 // string[] gating = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};
                 string[] gating = new string[] { "AnzB:LeftFootIndex4", "AnzB:RightFootIndex4" };

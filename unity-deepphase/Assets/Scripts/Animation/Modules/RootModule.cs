@@ -371,7 +371,10 @@ namespace AI4Animation
 
 			public Vector3 GetPosition(int index)
 			{
-				return Transformations[index].GetPosition();
+				LayerMask mask = LayerMask.GetMask("Ground");
+				Vector3 position = Transformations[index].GetPosition();
+				position.y =  Utility.GetHeightv2(position, mask);
+				return position;
 			}
 
 			public void SetRotation(int index, Quaternion value)
@@ -567,7 +570,7 @@ namespace AI4Animation
 					int nextIndex = GetNextKey(i).Index;
 					if (prevIndex != nextIndex)
 					{
-						SetPosition(i, Vector3.Lerp(GetPosition(prevIndex), GetPosition(nextIndex), weight));
+						SetPosition(i,  Vector3.Lerp(GetPosition(prevIndex), GetPosition(nextIndex), weight));
 						SetDirection(i, Vector3.Lerp(GetDirection(prevIndex), GetDirection(nextIndex), weight).normalized);
 						SetVelocity(i, Vector3.Lerp(GetVelocity(prevIndex), GetVelocity(nextIndex), weight));
 					}

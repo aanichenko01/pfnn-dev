@@ -434,6 +434,19 @@ public static class Utility {
 		return position.SetY(GetHeight(position, mask));
 	}
 
+	public static float GetHeightv2(Vector3 origin, LayerMask mask) {
+		RaycastHit[] hits = Physics.RaycastAll(new Vector3(origin.x, 1000f, origin.z), Vector3.down, float.PositiveInfinity, mask);
+		if(hits.Length == 0) {
+			return origin.y;
+		} else {
+			float height = float.MinValue;
+			foreach(RaycastHit hit in hits) {
+				height = Mathf.Max(hit.point.y, height);
+			}
+			return height;
+		}
+	}
+
 	public static float GetHeight(Vector3 origin, LayerMask mask, float sky=1000f) {
 		RaycastHit hit;
 		if(Physics.Raycast(new Vector3(origin.x, sky, origin.z), Vector3.down, out hit, float.PositiveInfinity, mask)) {
