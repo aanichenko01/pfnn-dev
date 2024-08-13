@@ -334,19 +334,19 @@ namespace DeepPhase
                 // Individual jump and idle clips //////////////////////////////////////////////////////
 
                 // Idle to Walk //////////////////////////////////////////////////////////////////////
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 437);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 437);
                 // Idle to Walk //////////////////////////////////////////////////////////////////////
 
                 // BASE JUMP SEQ /////////////////////////////////////////////////////////////////////
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 125);
-
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 132);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 125);
 
                 MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
-                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 124);
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 132);
+
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).Export = true;
+                MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).SetSequence(0, 1, 124);
                 // BASE JUMP SEQ /////////////////////////////////////////////////////////////////////
 
                 for (int i = 0; i < Pipeline.GetEditor().Assets.Count; i++)
@@ -432,7 +432,6 @@ namespace DeepPhase
                 {
                     rootMotion[f] = root.GetRootVelocity(asset.Frames[f].Timestamp, false).magnitude;
                     bodyMotion[f] = asset.Frames[f].GetBoneVelocities(Pipeline.GetEditor().GetSession().GetBoneMapping(), false).Magnitudes().Mean();
-                    // rootMotionY[f] = asset.Frames[f].GetBoneVelocity("AnzB:LeftFootIndex4", false).y;
                     rootMotionY[f] = asset.Frames[f].GetBoneVelocities(Pipeline.GetEditor().GetSession().GetBoneMapping(), false).ToArrayY().Mean();
 
                 }
@@ -454,7 +453,7 @@ namespace DeepPhase
                 {
                     float motion = Mathf.Min(rootMotion[f], bodyMotion[f]);
                     float movement = root.GetRootLength(asset.Frames[f].Timestamp, false);
-                    float jumpMotion = Mathf.Abs(rootMotionY[f]);
+                    float jumpMotion = Mathf.Abs(Mathf.Pow(rootMotionY[f], 10));
                     Debug.Log($"Frame={f},jumpMotion= {jumpMotion}");
                     idle.StandardValues[f] = motion < threshold ? 1f : 0f;
                     idle.MirroredValues[f] = motion < threshold ? 1f : 0f;
@@ -462,8 +461,10 @@ namespace DeepPhase
                     move.MirroredValues[f] = 1f - idle.StandardValues[f];
                     speed.StandardValues[f] = movement;
                     speed.MirroredValues[f] = movement;
-                    jump.StandardValues[f] = jumpMotion > jumpThreshold ? 1f : 0f;
-                    jump.MirroredValues[f] = jumpMotion > jumpThreshold ? 1f : 0f;
+
+                    jumpMotion = Mathf.Clamp(jumpMotion, 0f, 5f);
+                    jump.StandardValues[f] = jumpMotion;
+                    jump.MirroredValues[f] = jumpMotion;
                     weights[f] = Mathf.Sqrt(Mathf.Clamp(motion, 0f, threshold).Normalize(0f, threshold, 0f, 1f));
                     weightsJump[f] = Mathf.Sqrt(Mathf.Clamp(jumpMotion, 0f, jumpThreshold).Normalize(0f, jumpThreshold, 0f, 1f));
                 }
