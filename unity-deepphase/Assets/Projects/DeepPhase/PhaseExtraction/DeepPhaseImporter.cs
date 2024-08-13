@@ -89,10 +89,10 @@ namespace AI4Animation {
 
             DeepPhaseModule module = null;
             // TODO DELETE BETWEEN HERE HACK TO MAKE WORK ON ONLY ONE SEQUENCE
-            MotionAsset asset = Editor.GetSession().Asset;
-            asset.RemoveModule<DeepPhaseModule>(Tag);
-            module = asset.AddModule<DeepPhaseModule>(Tag);
-            module.CreateChannels(5);
+            // MotionAsset asset = Editor.GetSession().Asset;
+            // asset.RemoveModule<DeepPhaseModule>(Tag);
+            // module = asset.AddModule<DeepPhaseModule>(Tag);
+            // module.CreateChannels(5);
             
             Count = 0;
             while(Coroutine != null && !sequenceFile.EndOfStream) {
@@ -106,14 +106,14 @@ namespace AI4Animation {
                 bool fileMirrored = tags[2] == "Standard" ? false : true;
                 int fileFrame = tags[1].ToInt();
                 int channels = features.Length / 4;
-                // if(Editor.Asset != fileGUID) {
-                //     Editor.LoadSession(fileGUID);
-                //     MotionAsset asset = Editor.GetSession().Asset;
-                //     asset = Editor.GetSession().Asset;
-                //     asset.RemoveModule<DeepPhaseModule>(Tag);
-                //     module = asset.AddModule<DeepPhaseModule>(Tag);
-                //     module.CreateChannels(channels);
-                // }
+                if(Editor.Asset != fileGUID) {
+                    Editor.LoadSession(fileGUID);
+                    MotionAsset asset = Editor.GetSession().Asset;
+                    asset = Editor.GetSession().Asset;
+                    asset.RemoveModule<DeepPhaseModule>(Tag);
+                    module = asset.AddModule<DeepPhaseModule>(Tag);
+                    module.CreateChannels(channels);
+                }
 
                 for(int i=0; i<channels; i++) {
                     float phaseValue = Mathf.Repeat(features[0*channels+i], 1f);

@@ -1120,31 +1120,6 @@ namespace AI4Animation
 				//ASSET SECTION
 				Utility.SetGUIColor(UltiDraw.DarkGrey);
 
-				// AssetSession currentSession = Target.GetSession();
-				// if (currentSession != null)
-				// {
-				// 	MotionAsset currentAsset = currentSession.Asset;
-				// 	if (currentAsset.AddJumpTarget && currentAsset.JumpTarget == null)
-				// 	{
-				// 		if (Target.FootContactReferenceBone != null)
-				// 		{
-				// 			Debug.Log("Spawning new object");
-				// 			currentAsset.SpawnJumpTarget(currentAsset.Source.FindBone(Target.FootContactReferenceBone).Index);
-				// 		}
-				// 		else
-				// 		{
-				// 			Debug.LogError("Please provide a Foot Contact Reference Bone to spawn jump targets.");
-				// 		}
-				// 	}
-
-				// 	// // Destory Jump Target not toggled
-				// 	// if (!currentAsset.AddJumpTarget && currentAsset.JumpTarget != null)
-				// 	// {
-				// 	// 	currentAsset.DestroyJumpTarget();
-				// 	// }
-
-				// }
-
 				using (new EditorGUILayout.VerticalScope("Box"))
 				{
 					Utility.ResetGUIColor();
