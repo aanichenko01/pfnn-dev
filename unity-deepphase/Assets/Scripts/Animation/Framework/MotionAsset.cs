@@ -34,6 +34,25 @@ namespace AI4Animation
 
 		public static bool Settings = false;
 
+		public void ShiftGroundToFeet(int footContactRefIdx)
+		{
+			int totalFrames = GetTotalFrames() - 1;
+			Frame[] currentFrames = GetFrames(1, totalFrames);
+
+			Vector3 footContactFirstFrame = currentFrames[0].GetBoneTransformation(footContactRefIdx, false).GetPosition();
+
+			GameObject plane = GameObject.Find("Ground");
+			if (plane == null)
+			{
+				Debug.Log("No plane in scene please add a plane gameobject.");
+			}
+
+			float planeX = plane.transform.position.x;
+			float planeZ = plane.transform.position.z;
+
+			plane.transform.position = new Vector3(planeX, footContactFirstFrame.y, planeZ);
+		}
+
 		public void SpawnJumpTarget(int footContactRefIdx)
 		{
 

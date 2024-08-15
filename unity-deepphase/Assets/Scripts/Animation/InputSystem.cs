@@ -373,6 +373,13 @@ public class InputSystem {
 		return turn;
 	}
 
+	public bool QueryJumpKeyboard() {
+		if(Input.GetKey(KeyCode.Space)) {
+			return true;
+		}
+		else return false;
+	}
+
 	public Vector3 QueryDPadController() {
 		return ControllerDPad;
 	}

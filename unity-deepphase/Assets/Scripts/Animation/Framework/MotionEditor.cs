@@ -135,17 +135,22 @@ namespace AI4Animation
 				Asset.Load(Editor);
 				Actor = GetActor();
 
-				if (Asset.JumpTarget == null && Asset.AddJumpTarget)
+				if (Editor.FootContactReferenceBone != null)
 				{
-					if (Editor.FootContactReferenceBone != null)
+					int footRefIndex = Asset.Source.FindBone(Editor.FootContactReferenceBone).Index;
+					Asset.ShiftGroundToFeet(footRefIndex);
+					if (Asset.JumpTarget == null && Asset.AddJumpTarget)
 					{
-						Debug.Log("Spawning new object");
-						Asset.SpawnJumpTarget(Asset.Source.FindBone(Editor.FootContactReferenceBone).Index);
+						if (Editor.FootContactReferenceBone != null)
+						{
+							Debug.Log("Spawning new object");
+							Asset.SpawnJumpTarget(footRefIndex);
+						}
 					}
-					else
-					{
-						Debug.LogError("Please provide a Foot Contact Reference Bone to spawn jump targets.");
-					}
+				}
+				else
+				{
+					Debug.LogError("Please provide a Foot Contact Reference Bone to spawn jump targets and shift plane.");
 				}
 
 			}

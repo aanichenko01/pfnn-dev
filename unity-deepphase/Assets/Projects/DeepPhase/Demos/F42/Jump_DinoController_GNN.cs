@@ -64,7 +64,7 @@ namespace DeepPhase {
             InputSystem.Logic move = Controller.AddLogic("Move", () => !idle.Query());
             InputSystem.Logic speed = Controller.AddLogic("Speed", () => true);
             // TODO UPDATE THIS TO ACCOUNT FOR HEIGHT MAYBE CAN QUERY TRAJECTORY HEIGHT OR SMTH
-            InputSystem.Logic jump = Controller.AddLogic("Jump", () => false); //for now to test if working if moving jump is assumed
+            InputSystem.Logic jump = Controller.AddLogic("Jump", () => Controller.QueryJumpKeyboard()); //for now to test if working if moving jump is assumed
             // InputSystem.Logic sprint = Controller.AddLogic("Sprint", () => move.Query() && Controller.QueryLeftJoystickVector().y > 0.25f);
 
             TimeSeries = new TimeSeries(6, 6, 1f, 1f, 10);
