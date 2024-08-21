@@ -465,7 +465,7 @@ namespace PFNN_DEV
 				}
 
 				UltiDraw.Begin();
-				UltiDraw.DrawGUIHorizontalBar(new Vector2(0.5f, 0.9f), new Vector2(0.25f, 0.05f), UltiDraw.White, 0.0025f, UltiDraw.Mustard, NN.GetPhase(), UltiDraw.DarkGrey);
+				// UltiDraw.DrawGUIHorizontalBar(new Vector2(0.5f, 0.9f), new Vector2(0.25f, 0.05f), UltiDraw.White, 0.0025f, UltiDraw.Mustard, NN.GetPhase(), UltiDraw.DarkGrey);
 				UltiDraw.End();
 			}
 		}
