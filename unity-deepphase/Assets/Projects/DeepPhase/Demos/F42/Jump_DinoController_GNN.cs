@@ -296,13 +296,13 @@ namespace DeepPhase {
 
         protected override void OnGUIDerived() {
             RootSeries.DrawGUI = DrawGUI;
-            StyleSeries.DrawGUI = DrawGUI;
-            ContactSeries.DrawGUI = DrawGUI;
-            PhaseSeries.DrawGUI = DrawGUI;
+            // StyleSeries.DrawGUI = DrawGUI;
+            // ContactSeries.DrawGUI = DrawGUI;
+            // PhaseSeries.DrawGUI = DrawGUI;
             RootSeries.GUI();
-            StyleSeries.GUI();
-            ContactSeries.GUI();
-            PhaseSeries.GUI();
+            // StyleSeries.GUI();
+            // ContactSeries.GUI();
+            // PhaseSeries.GUI();
         }
 
         protected override void OnRenderObjectDerived() {
@@ -311,9 +311,9 @@ namespace DeepPhase {
             ContactSeries.DrawScene = DrawDebug;
             PhaseSeries.DrawScene = DrawDebug;
             RootSeries.Draw();
-            StyleSeries.Draw();
-            ContactSeries.Draw();
-            PhaseSeries.Draw();
+            // StyleSeries.Draw();
+            // ContactSeries.Draw();
+            // PhaseSeries.Draw();
         }
 
     }
