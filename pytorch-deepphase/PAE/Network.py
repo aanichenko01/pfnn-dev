@@ -174,54 +174,54 @@ if __name__ == '__main__':
                 (Item(loss).item(), "Reconstruction Loss")
             )
 
-            if loss_history.Counter == 0:
-                network.eval()
+            # if loss_history.Counter == 0:
+            #     network.eval()
 
-                plot.Functions(ax1[0], Item(train_batch[0]).reshape(network.input_channels,frames), -1.0, 1.0, -5.0, 5.0, title="Motion Curves" + " " + str(network.input_channels) + "x" + str(frames), showAxes=False)
-                plot.Functions(ax1[1], Item(latent[0]), -1.0, 1.0, -2.0, 2.0, title="Latent Convolutional Embedding" + " " + str(phase_channels) + "x" + str(frames), showAxes=False)
-                plot.Circles(ax1[2], Item(params[0][0]).squeeze(), Item(params[2][0]).squeeze(), title="Learned Phase Timing"  + " " + str(phase_channels) + "x" + str(2), showAxes=False)
-                plot.Functions(ax1[3], Item(signal[0]), -1.0, 1.0, -2.0, 2.0, title="Latent Parametrized Signal" + " " + str(phase_channels) + "x" + str(frames), showAxes=False)
-                plot.Functions(ax1[4], Item(yPred[0]).reshape(network.input_channels,frames), -1.0, 1.0, -5.0, 5.0, title="Curve Reconstruction" + " " + str(network.input_channels) + "x" + str(frames), showAxes=False)
-                plot.Function(ax1[5], [Item(train_batch[0]), Item(yPred[0])], -1.0, 1.0, -5.0, 5.0, colors=[(0, 0, 0), (0, 1, 1)], title="Curve Reconstruction (Flattened)" + " " + str(1) + "x" + str(network.input_channels*frames), showAxes=False)
-                plot.Distribution(ax3[0], dist_amps, title="Amplitude Distribution")
-                plot.Distribution(ax3[1], dist_freqs, title="Frequency Distribution")
+            #     plot.Functions(ax1[0], Item(train_batch[0]).reshape(network.input_channels,frames), -1.0, 1.0, -5.0, 5.0, title="Motion Curves" + " " + str(network.input_channels) + "x" + str(frames), showAxes=False)
+            #     plot.Functions(ax1[1], Item(latent[0]), -1.0, 1.0, -2.0, 2.0, title="Latent Convolutional Embedding" + " " + str(phase_channels) + "x" + str(frames), showAxes=False)
+            #     plot.Circles(ax1[2], Item(params[0][0]).squeeze(), Item(params[2][0]).squeeze(), title="Learned Phase Timing"  + " " + str(phase_channels) + "x" + str(2), showAxes=False)
+            #     plot.Functions(ax1[3], Item(signal[0]), -1.0, 1.0, -2.0, 2.0, title="Latent Parametrized Signal" + " " + str(phase_channels) + "x" + str(frames), showAxes=False)
+            #     plot.Functions(ax1[4], Item(yPred[0]).reshape(network.input_channels,frames), -1.0, 1.0, -5.0, 5.0, title="Curve Reconstruction" + " " + str(network.input_channels) + "x" + str(frames), showAxes=False)
+            #     plot.Function(ax1[5], [Item(train_batch[0]), Item(yPred[0])], -1.0, 1.0, -5.0, 5.0, colors=[(0, 0, 0), (0, 1, 1)], title="Curve Reconstruction (Flattened)" + " " + str(1) + "x" + str(network.input_channels*frames), showAxes=False)
+            #     plot.Distribution(ax3[0], dist_amps, title="Amplitude Distribution")
+            #     plot.Distribution(ax3[1], dist_freqs, title="Frequency Distribution")
 
-                indices = gather_window + random.choice(test_sequences)
-                _, _, _, params = network(LoadBatches(indices))
+            #     indices = gather_window + random.choice(test_sequences)
+            #     _, _, _, params = network(LoadBatches(indices))
 
-                for i in range(phase_channels):
-                    phase = params[0][:,i]
-                    freq = params[1][:,i]
-                    amps = params[2][:,i]
-                    offs = params[3][:,i]
-                    plot.Phase1D(ax2[i,0], Item(phase), Item(amps), color=(0, 0, 0), title=("1D Phase Values" if i==0 else None), showAxes=False)
-                    plot.Phase2D(ax2[i,1], Item(phase), Item(amps), title=("2D Phase Vectors" if i==0 else None), showAxes=False)
-                    plot.Functions(ax2[i,2], Item(freq).transpose(0,1), -1.0, 1.0, 0.0, 4.0, title=("Frequencies" if i==0 else None), showAxes=False)
-                    plot.Functions(ax2[i,3], Item(amps).transpose(0,1), -1.0, 1.0, 0.0, 1.0, title=("Amplitudes" if i==0 else None), showAxes=False)
-                    plot.Functions(ax2[i,4], Item(offs).transpose(0,1), -1.0, 1.0, -1.0, 1.0, title=("Offsets" if i==0 else None), showAxes=False)
+            #     for i in range(phase_channels):
+            #         phase = params[0][:,i]
+            #         freq = params[1][:,i]
+            #         amps = params[2][:,i]
+            #         offs = params[3][:,i]
+            #         plot.Phase1D(ax2[i,0], Item(phase), Item(amps), color=(0, 0, 0), title=("1D Phase Values" if i==0 else None), showAxes=False)
+            #         plot.Phase2D(ax2[i,1], Item(phase), Item(amps), title=("2D Phase Vectors" if i==0 else None), showAxes=False)
+            #         plot.Functions(ax2[i,2], Item(freq).transpose(0,1), -1.0, 1.0, 0.0, 4.0, title=("Frequencies" if i==0 else None), showAxes=False)
+            #         plot.Functions(ax2[i,3], Item(amps).transpose(0,1), -1.0, 1.0, 0.0, 1.0, title=("Amplitudes" if i==0 else None), showAxes=False)
+            #         plot.Functions(ax2[i,4], Item(offs).transpose(0,1), -1.0, 1.0, -1.0, 1.0, title=("Offsets" if i==0 else None), showAxes=False)
                 
-                #Visualization
-                pca_indices = []
-                pca_batches = []
-                pivot = 0
-                for i in range(pca_sequence_count):
-                    indices = gather_window + random.choice(test_sequences)
-                    _, _, _, params = network(LoadBatches(indices))
-                    a = Item(params[2]).squeeze()
-                    p = Item(params[0]).squeeze()
-                    b = Item(params[3]).squeeze()
-                    m_x = a * np.sin(2.0 * np.pi * p) + b
-                    m_y = a * np.cos(2.0 * np.pi * p) + b
-                    manifold = torch.hstack((m_x, m_y))
-                    pca_indices.append(pivot + np.arange(len(indices)))
-                    pca_batches.append(manifold)
-                    pivot += len(indices)
+            #     #Visualization
+            #     pca_indices = []
+            #     pca_batches = []
+            #     pivot = 0
+            #     for i in range(pca_sequence_count):
+            #         indices = gather_window + random.choice(test_sequences)
+            #         _, _, _, params = network(LoadBatches(indices))
+            #         a = Item(params[2]).squeeze()
+            #         p = Item(params[0]).squeeze()
+            #         b = Item(params[3]).squeeze()
+            #         m_x = a * np.sin(2.0 * np.pi * p) + b
+            #         m_y = a * np.cos(2.0 * np.pi * p) + b
+            #         manifold = torch.hstack((m_x, m_y))
+            #         pca_indices.append(pivot + np.arange(len(indices)))
+            #         pca_batches.append(manifold)
+            #         pivot += len(indices)
 
-                plot.PCA2D(ax4[0], pca_indices, pca_batches, "Phase Manifold (" + str(pca_sequence_count) + " Random Sequences)")
+            #     plot.PCA2D(ax4[0], pca_indices, pca_batches, "Phase Manifold (" + str(pca_sequence_count) + " Random Sequences)")
 
-                plt.gcf().canvas.draw_idle()
-            plt.gcf().canvas.start_event_loop(1e-5)
-            #End Visualization Section
+            #     plt.gcf().canvas.draw_idle()
+            # plt.gcf().canvas.start_event_loop(1e-5)
+            # #End Visualization Section
 
         torch.save(network, Save + "/"+str(epoch+1)+"_"+str(phase_channels)+"Channels"+".pt") 
 

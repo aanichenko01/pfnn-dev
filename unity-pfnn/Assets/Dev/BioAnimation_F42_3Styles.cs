@@ -168,10 +168,6 @@ namespace PFNN_DEV
 			}
 
 			float[] style = Controller.GetStyle();
-			// if(style[2] == 0f) {
-			// 	style[1] = Mathf.Max(style[1], Mathf.Clamp(Trajectory.Points[RootPointIndex].GetVelocity().magnitude, 0f, 1f));
-			// }
-			// TODO IF ANY OF THE POINTS ARE TOUCHING CUBE THE CHANGE the style array above to be 1 for jump
 
 			// Iterate over all points in the trajectory starting from RootPointIndex
 			for (int i = RootPointIndex; i < Trajectory.Points.Length; i++)
@@ -192,18 +188,6 @@ namespace PFNN_DEV
 			for (int i = RootPointIndex; i < Trajectory.Points.Length; i++)
 			{
 				float weight = (float)(i - RootPointIndex) / (float)FuturePoints; //w between 0 and 1
-
-				// float yDiff = Trajectory.Points[i].GetPosition().y - Trajectory.Points[i - 1].GetPosition().y;
-
-				// Debug.Log(yDiff);
-				// if (Math.Abs(yDiff) > 0.001f)
-				// {
-				// 	// Debug.Log("Jump!");
-				// 	style[0] = 0f;
-				// 	style[1] = 0f;
-				// 	style[2] = 1f;
-
-				// }
 
 				for (int j = 0; j < Trajectory.Points[i].Styles.Length; j++)
 				{
@@ -439,9 +423,9 @@ namespace PFNN_DEV
 				if (ShowTrajectory)
 				{
 					UltiDraw.Begin();
-					// TODO COMMENT BACK IN IF WANT DIRECTION
+					// Comment back in for direction visualization
 					// UltiDraw.DrawLine(Trajectory.Points[RootPointIndex].GetPosition(), Trajectory.Points[RootPointIndex].GetPosition() + TargetDirection, 0.05f, 0f, UltiDraw.Red.Transparent(0.75f));
-					// TODO THIS USED TO BE GREEN
+					// Comments back in for velcoity visualization
 					// UltiDraw.DrawLine(Trajectory.Points[RootPointIndex].GetPosition(), Trajectory.Points[RootPointIndex].GetPosition() + TargetVelocity, 0.05f, 0f, UltiDraw.Red.Transparent(0.75f));
 					UltiDraw.End();
 					Trajectory.Draw(10);

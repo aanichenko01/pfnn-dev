@@ -601,8 +601,8 @@ namespace DeepPhase
                 Container current = new Container(setup, tCurrent);
                 Container next = new Container(setup, tNext);
 
+                // string[] styles = new string[] { "Idle", "Move", "Speed"};
                 string[] styles = new string[] { "Idle", "Move", "Speed", "Jump" };
-                // string[] styles = new string[] { "Idle", "Jump", "Speed" };
 
                 // string[] styles = new string[]{"Speed"};
                 // string[] contacts = new string[]{"LeftHandSite", "RightHandSite", "LeftFootSite", "RightFootSite"};

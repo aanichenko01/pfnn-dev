@@ -101,12 +101,12 @@ if __name__ == '__main__':
     # main_indices = torch.tensor([(0 + i) for i in range(429)])
     
     # Dino 5 channels NO Jump
-    # gating_indices = torch.tensor([(1845 + i) for i in range(130)])
-    # main_indices = torch.tensor([(0 + i) for i in range(1845)])
+    gating_indices = torch.tensor([(1845 + i) for i in range(130)])
+    main_indices = torch.tensor([(0 + i) for i in range(1845)])
 
     # Dino 5 channels Jump
-    gating_indices = torch.tensor([(1858 + i) for i in range(130)])
-    main_indices = torch.tensor([(0 + i) for i in range(1858)])
+    # gating_indices = torch.tensor([(1858 + i) for i in range(130)])
+    # main_indices = torch.tensor([(0 + i) for i in range(1858)])
 
     # Dino 3 channels
     # gating_indices = torch.tensor([(1845 + i) for i in range(78)])

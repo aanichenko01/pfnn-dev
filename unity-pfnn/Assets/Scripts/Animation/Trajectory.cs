@@ -232,6 +232,10 @@ public class Trajectory {
 		UltiDraw.Begin();
 
 		Color[] colors = UltiDraw.GetRainbowColors(Styles.Length);
+		// Debug.Log(colors[2]);
+		// colors[1].r = 0.998f;
+		// colors[1].g = 0.252f;
+		// colors[1].b =  0.214f;
 
 		//Connections
 		for(int i=0; i<Points.Length-step; i+=step) {
@@ -270,20 +274,20 @@ public class Trajectory {
 		}
 
 		//Styles
-		if(Styles.Length > 0) {
-			for(int i=0; i<Points.Length; i+=step) {
-				float r = 0f;
-				float g = 0f;
-				float b = 0f;
-				for(int j=0; j<Points[i].Styles.Length; j++) {
-					r += Points[i].Styles[j] * colors[j].r;
-					g += Points[i].Styles[j] * colors[j].g;
-					b += Points[i].Styles[j] * colors[j].b;
-				}
-				Color color = new Color(r,g,b,1f);
-				UltiDraw.DrawCube(Points[i].GetPosition(), Points[i].GetRotation(), 0.05f, color);
-			}
-		}
+		// if(Styles.Length > 0) {
+		// 	for(int i=0; i<Points.Length; i+=step) {
+		// 		float r = 0f;
+		// 		float g = 0f;
+		// 		float b = 0f;
+		// 		for(int j=0; j<Points[i].Styles.Length; j++) {
+		// 			r += Points[i].Styles[j] * colors[j].r;
+		// 			g += Points[i].Styles[j] * colors[j].g;
+		// 			b += Points[i].Styles[j] * colors[j].b;
+		// 		}
+		// 		Color color = new Color(r,g,b,1f);
+		// 		UltiDraw.DrawCube(Points[i].GetPosition(), Points[i].GetRotation(), 0.05f, color);
+		// 	}
+		// }
 
 		//Signals
 		/*
