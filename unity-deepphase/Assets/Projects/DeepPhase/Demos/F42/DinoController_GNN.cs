@@ -3,6 +3,8 @@ using AI4Animation;
 using UltimateIK;
 using System.Collections.Generic;
 using Unity.Barracuda;
+using Unity.Mathematics;
+using System;
 
 namespace DeepPhase {
     public class DinoController_GNN : AnimationController {
@@ -42,8 +44,19 @@ namespace DeepPhase {
 
         private IK LeftFootIK;
         private IK RightFootIK;
-        // private IK LeftHandIK;
-        // private IK RightHandIK;
+
+        private float[] PreviousPositionsMagnitude;
+		private float TotalMagnitudeDiff;
+		private float TimeElapsed;
+		private float TimeInterval = 1f;
+
+		private float[] PreviousY;
+		private float[] PreviousZ;
+
+		private float TotalYDiff;
+		private float TotalZDiff;
+
+		private int Count;
 
         public void RetrieveContacts(List<Vector4> contacts) {
             void Accumulate(string name, int index) {
@@ -53,8 +66,6 @@ namespace DeepPhase {
             }
             Accumulate("AnzB:LeftFootIndex4", 0);
             Accumulate("AnzB:RightFootIndex4", 1);
-            // Accumulate("LeftFootSite", 2);
-            // Accumulate("RightFootSite", 3);
         }
 
         protected override void Setup() {	
@@ -63,17 +74,13 @@ namespace DeepPhase {
             InputSystem.Logic idle = Controller.AddLogic("Idle", () => Controller.QueryLeftJoystickVector().magnitude < 0.1f && Controller.QueryRightJoystickVector().magnitude < 0.1f);
             InputSystem.Logic move = Controller.AddLogic("Move", () => !idle.Query());
             InputSystem.Logic speed = Controller.AddLogic("Speed", () => true);
-            // InputSystem.Logic sprint = Controller.AddLogic("Sprint", () => move.Query() && Controller.QueryLeftJoystickVector().y > 0.25f);
 
             TimeSeries = new TimeSeries(6, 6, 1f, 1f, 10);
             RootSeries = new RootModule.Series(TimeSeries, transform);
             StyleSeries = new StyleModule.Series(TimeSeries, new string[]{"Idle", "Move", "Speed"}, new float[]{1f, 0f, 0f});
-            // ContactSeries = new ContactModule.Series(TimeSeries, "Left Hand", "Right Hand", "Left Foot", "Right Foot");
             ContactSeries = new ContactModule.Series(TimeSeries, "Left Foot", "Right Foot");
             PhaseSeries = new DeepPhaseModule.Series(TimeSeries, Channels);
 
-            // LeftHandIK = IK.Create(Actor.FindTransform("LeftForeArm"), Actor.GetBoneTransforms("LeftHandSite"));
-            // RightHandIK = IK.Create(Actor.FindTransform("RightForeArm"), Actor.GetBoneTransforms("RightHandSite"));
             LeftFootIK = IK.Create(Actor.FindTransform("AnzB:LeftLeg"), Actor.GetBoneTransforms("AnzB:LeftFootIndex4"));
             RightFootIK = IK.Create(Actor.FindTransform("AnzB:RightLeg"), Actor.GetBoneTransforms("AnzB:RightFootIndex4"));
 
@@ -90,6 +97,26 @@ namespace DeepPhase {
             ActivePhases.SetAll(true);
 
             NeuralNetwork.CreateSession();
+
+            // Metric variables
+            PreviousPositionsMagnitude = new float[Actor.Bones.Length];
+			
+			PreviousY = new float[Actor.Bones.Length];
+			PreviousZ = new float[Actor.Bones.Length];
+
+			TotalMagnitudeDiff = 0f;
+			TimeElapsed = 0f;
+			Count = 0;
+
+            // Setup
+            for (int i = 0; i < Actor.Bones.Length; i++)
+			{
+                Vector3 zyPos = Actor.Bones[i].GetPosition();
+                zyPos.x = 0f;
+				PreviousPositionsMagnitude[i] = zyPos.magnitude;
+				PreviousY[i] = Actor.Bones[i].GetPosition().y;
+				PreviousZ[i] = Actor.Bones[i].GetPosition().z;
+			}
         }
 
 		protected override void Destroy() {
@@ -98,10 +125,41 @@ namespace DeepPhase {
 
         protected override void Control() {
             UserControl();
-            Debug.Log("Getting user control");
             Feed();
             NeuralNetwork.RunSession();
             Read();
+
+            
+            // Metrics
+            TimeElapsed += Time.deltaTime;
+            if (TimeElapsed >= TimeInterval) {
+				Count += 1;
+				for (int i = 0; i < Actor.Bones.Length; i++)
+				{
+					Vector3 zyPos = Actor.Bones[i].GetPosition();
+					zyPos.x = 0f;
+					float currentMagnitude = zyPos.magnitude;
+
+					TotalMagnitudeDiff += Math.Abs(currentMagnitude - PreviousPositionsMagnitude[i]);
+					TotalYDiff += Math.Abs(Actor.Bones[i].GetPosition().y - PreviousY[i]);
+					TotalZDiff += Math.Abs(Actor.Bones[i].GetPosition().z - PreviousZ[i]);
+					
+					PreviousPositionsMagnitude[i] = currentMagnitude;
+					PreviousY[i] = Actor.Bones[i].GetPosition().y;
+					PreviousZ[i] = Actor.Bones[i].GetPosition().z;
+				}
+
+				float avgMagnitudeDiff = TotalMagnitudeDiff / (Actor.Bones.Length * TimeInterval);
+				float avgYDiff = TotalYDiff / ( Actor.Bones.Length* TimeInterval);
+				float avgZDiff = TotalZDiff / ( Actor.Bones.Length* TimeInterval);
+            	Debug.Log($"[{Count}]Average change in magnitude per second: {avgMagnitudeDiff}");
+				Debug.Log($"[{Count}]Average change in Y per second: {avgYDiff}");
+				Debug.Log($"[{Count}]Average change in Z per second: {avgZDiff}");
+				TotalMagnitudeDiff = 0f;
+                TotalYDiff = 0f;
+                TotalZDiff = 0f;
+                TimeElapsed = 0f;
+			}
         }
 
         private void UserControl() {
@@ -116,12 +174,7 @@ namespace DeepPhase {
 
             //Amplify Factors
             move = Quaternion.LookRotation(Vector3.ProjectOnPlane(transform.position - Camera.transform.position, Vector3.up).normalized, Vector3.up) * move;
-            // if(Controller.QueryLogic("Sprint")) {
-            //     move *= SprintSpeed;
-            // } else {
             move *= MoveSpeed;
-            // }
-            Debug.Log(move);
 
             //Trajectory
             RootSeries.Control(move, face, ControlWeight, PositionBias, DirectionBias, VelocityBias);
@@ -152,12 +205,6 @@ namespace DeepPhase {
                 NeuralNetwork.Feed(Actor.Bones[i].GetTransform().up.DirectionTo(root));
                 NeuralNetwork.Feed(Actor.Bones[i].GetVelocity().DirectionTo(root));
             }
-
-            //Input Contacts
-            // for(int i=0; i<=TimeSeries.PivotKey; i++) {
-            //     int index = TimeSeries.GetKey(i).Index;
-            //     NeuralNetwork.Feed(ContactSeries.Values[index]);
-            // }
 
             //Input Gating Features
             NeuralNetwork.Feed(PhaseSeries.GetAlignment());
