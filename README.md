@@ -1,7 +1,7 @@
 # Dynamic and Intelligent Creatures using Keyframed Animations
 
 ## About
-This repository contains all the code used for the Dynamic and Intelligent Creatures using Keyframed Animations project excluding the company data which can be provided upon request. 
+This repository contains all the code used for the Dynamic and Intelligent Creatures using Keyframed Animations project excluding the data which can be provided upon request. 
 
 ## Folders
 There are 4 folders:
