@@ -199,7 +199,6 @@ namespace DeepPhase
             //Input Timeseries
             for (int i = 0; i < TimeSeries.KeyCount; i++)
             {
-                // TODO THIS IS HOW I CAN GET TRAJECTORY INFO FOR CHANGING STYLE
                 int index = TimeSeries.GetKey(i).Index;
                 NeuralNetwork.FeedXZ(RootSeries.GetPosition(index).PositionTo(root));
                 NeuralNetwork.FeedXZ(RootSeries.GetDirection(index).DirectionTo(root));

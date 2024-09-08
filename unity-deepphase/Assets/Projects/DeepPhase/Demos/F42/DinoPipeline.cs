@@ -325,53 +325,6 @@ namespace DeepPhase
                 }
 
 
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 74);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 65);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 57);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).SetSequence(0, 1, 62);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[4]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[4]).SetSequence(0, 1, 62);
-
-                // TODO
-
-                // Individual jump and idle clips //////////////////////////////////////////////////////
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 74);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 52);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 58);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).SetSequence(0, 1, 50);
-                // Individual jump and idle clips //////////////////////////////////////////////////////
-
-                // Idle to Walk //////////////////////////////////////////////////////////////////////
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[0]).SetSequence(0, 1, 437);
-                // Idle to Walk //////////////////////////////////////////////////////////////////////
-
-                // BASE JUMP SEQ /////////////////////////////////////////////////////////////////////
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[1]).SetSequence(0, 1, 125);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[2]).SetSequence(0, 1, 132);
-
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).Export = true;
-                // MotionAsset.Retrieve(Pipeline.GetEditor().Assets[3]).SetSequence(0, 1, 124);
-                // BASE JUMP SEQ /////////////////////////////////////////////////////////////////////
-
                 for (int i = 0; i < Pipeline.GetEditor().Assets.Count; i++)
                 {
                     MotionAsset.Retrieve(Pipeline.GetEditor().Assets[i]).MarkDirty(true, false);
@@ -526,20 +479,6 @@ namespace DeepPhase
                         speed.MirroredValues[i] = Mathf.Lerp(speed.MirroredValues[i], 0f, idle.MirroredValues[i]);
                     }
                 }
-                // {
-                //     float[] copy = jump.StandardValues.Copy();
-                //     // TODO UPDATE PAD VALUE IF WEIRD DIPS
-                //     int pad = 5;
-                //     for (int i = 0; i < copy.Length; i++)
-                //     {
-                //         if (i > pad && i < copy.Length - pad)
-                //         {
-                //             if(copy[i - pad] == copy[i + pad]) {
-                //                 jump.StandardValues[i] = copy[i - pad];
-                //             }
-                //         }
-                //     }
-                // }
                 {
                     float[] copy = jump.StandardValues.Copy();
                     for (int i = 0; i < copy.Length; i++)
@@ -550,46 +489,6 @@ namespace DeepPhase
                 }
 
             }
-
-            // {
-            //     StyleModule module = asset.HasModule<StyleModule>() ? asset.GetModule<StyleModule>() : asset.AddModule<StyleModule>();
-            //     module.Clear();
-
-            //     RootModule root = asset.GetModule<RootModule>();
-            //     StyleModule.StyleFunction rooted = module.AddStyle("Rooted");
-            //     StyleModule.StyleFunction speed = module.AddStyle("Speed");
-            //     float threshold = 0.1f;
-            //     float[] rootMotion = new float[asset.Frames.Length];
-            //     float[] bodyMotion = new float[asset.Frames.Length];
-            //     for(int f=0; f<asset.Frames.Length; f++) {
-            //         rootMotion[f] = root.GetRootVelocity(asset.Frames[f].Timestamp, false).magnitude;
-            //         bodyMotion[f] = asset.Frames[f].GetBoneVelocities(Pipeline.GetEditor().GetSession().GetBoneMapping(), false).Magnitudes().Mean();
-            //     }
-            //     float GetMotionValue(int index) {
-            //         return Mathf.Max(rootMotion[index], bodyMotion[index]);
-            //     }
-            //     float GetMotionWeight(int index) {
-            //         return Mathf.Clamp(GetMotionValue(index), 0f, threshold).Normalize(0f, threshold, 0f, 1f).SmoothStep(2f, 0.5f);
-            //     }
-            //     for(int f=0; f<asset.Frames.Length; f++) {
-            //         rooted.Values[f] = 1f-GetMotionWeight(f);
-            //         speed.Values[f] = root.GetTranslationalSpeed(asset.Frames[f].Timestamp, false);
-            //     }
-            //     rooted.Values.SmoothGaussian(Mathf.RoundToInt(0.5f*root.Window*asset.Framerate));
-            //     {
-            //         float[] copy = speed.Values.Copy();
-            //         float[] grads = copy.Gradients(asset.GetDeltaTime());
-            //         for(int i=0; i<copy.Length; i++) {
-            //             int padding = Mathf.RoundToInt(0.5f*root.Window*asset.Framerate);
-            //             float power = Mathf.Abs(grads.GatherByWindow(i, padding).Gaussian());
-            //             speed.Values[i] = Mathf.Lerp(copy.GatherByWindow(i, padding).Gaussian(power), speed.Values[i], 1f-GetMotionWeight(i));
-            //         }
-            //     }
-            // }
-
-            // if(!asset.HasModule<TailModule>()) {
-            //     asset.AddModule<TailModule>();
-            // }
 
             asset.MarkDirty(true, false);
         }
