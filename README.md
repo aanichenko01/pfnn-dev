@@ -9,7 +9,7 @@ There are 4 folders:
 * `pytorch-deepphase` is the PyTorch DeepPhase implementation from https://github.com/sebastianstarke/AI4Animation adapted to the project
 * `pytorch-pfnn` is the rewritten PyTorch implementation based on the orginal paper by Holden  et al. https://theorangeduck.com/media/uploads/other_stuff/phasefunction.pdf adapted to the project
 * `unity-deepphase` is the Unity DeepPhase implementation from https://github.com/sebastianstarke/AI4Animation adapted to the project
-* `unity-ofnn` is the Unity PFNN implementation from https://github.com/sebastianstarke/AI4Animation adapted to the project
+* `unity-pfnn` is the Unity PFNN implementation from https://github.com/sebastianstarke/AI4Animation adapted to the project
 
 ## Usage Instructions
 
