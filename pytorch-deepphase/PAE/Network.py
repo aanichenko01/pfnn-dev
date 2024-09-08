@@ -21,7 +21,6 @@ if __name__ == '__main__':
     #Start Parameter Section
     window = 2.0 #time duration of the time window 
     fps = 60 #fps of the motion capture data
-    # joints = 26 #joints of the character skeleton
     
     # Dino
     joints = 144 #joints of the character skeleton
