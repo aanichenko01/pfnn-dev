@@ -15,6 +15,6 @@ There are 4 folders:
 
 * To run Unity implementations open the respective folder as a unity project and navigate to the Dev/Demo environments which will have demo scenes avaiable.
 
-* For  `pytorch-pfnn`  use the requirements.txt file in the respective folder to create a virtual environment. The you can simply run the  `PFNN_train.ipynb`.
+* For  `pytorch-pfnn`  use the requirements.txt file in the respective folder to create a virtual environment. Then you can simply run the  `PFNN_train.ipynb`.
 
 * For `pytorch-deepphase`  the respective README.md contains detailed instructions.
