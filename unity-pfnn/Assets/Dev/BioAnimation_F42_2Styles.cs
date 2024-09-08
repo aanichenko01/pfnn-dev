@@ -409,9 +409,9 @@ namespace PFNN_DEV
 				if (ShowTrajectory)
 				{
 					UltiDraw.Begin();
-					// TODO COMMENT BACK IN IF WANT DIRECTION
+					// Comment back in for direction visualization
 					// UltiDraw.DrawLine(Trajectory.Points[RootPointIndex].GetPosition(), Trajectory.Points[RootPointIndex].GetPosition() + TargetDirection, 0.05f, 0f, UltiDraw.Red.Transparent(0.75f));
-					// TODO THIS USED TO BE GREEN
+					// Comment back in for velocity visualisation
 					// UltiDraw.DrawLine(Trajectory.Points[RootPointIndex].GetPosition(), Trajectory.Points[RootPointIndex].GetPosition() + TargetVelocity, 0.05f, 0f, UltiDraw.Red.Transparent(0.75f));
 					UltiDraw.End();
 					Trajectory.Draw(10);
